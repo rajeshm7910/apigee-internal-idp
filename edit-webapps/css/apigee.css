@@ -1,0 +1,65 @@
+.apigee-alerter {
+    /*background-color: #65c8fa;*/
+    /*position: relative;*/
+    /*text-align: center;*/
+    /*color: white;*/
+
+    background-color: #65c8fa;
+    text-align: center;
+    color: white;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+}
+
+.apigee-alerter-content {
+    padding-top: 7px;
+    padding-bottom: 1px;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.apigee-alerter-content a{
+    color: white;
+}
+
+.apigee-login-content {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -40px;
+    padding-top: 100px;
+    position: relative;
+}
+
+.apigee-footer {
+    text-align: center;
+    color: #9faaad;
+    font-size: 12px;
+    position: relative;
+}
+
+.apigee-alerter-closer {
+    text-decoration: none;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 70px;
+    z-index: 2030;
+    width: 60px;
+    cursor: pointer;
+    background: transparent url('../../images/close_x.png') no-repeat 50% 50%;
+    background-size: 14px;
+}
+.only-saml-login {
+    border-bottom: 1px solid #cccccc;
+    color: #cccccc;
+    font-size: 14px;
+    line-height: 18px;
+    margin-bottom: 10px;
+    padding: 10px 0; }
+.only-saml-login .saml-login-link {
+    font-weight: 600; }
+.only-saml-login p {
+    color: #7f7f7f; }
