@@ -76,6 +76,14 @@ cd shibboleth-idp
 ./install.sh idp-config.txt
 ```
 
+
+### Changes routes in edge-management-ui box
+
+```
+cd edge-management-ui
+./configure.sh
+```
+
 ### Start Apigee Internal Idp Service 
 ```
 /opt/apigee/apache-tomcat-idp/etc/init.d/apigee-internal-idp start
