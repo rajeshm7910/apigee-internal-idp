@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+APIGEE_ROOT=/opt/apigee
+source $APIGEE_ROOT/apache-tomcat-idp/lib/apigee-env.sh
+case "$1" in
+  start)
+        su -p -s /bin/sh $RUN_USER /opt/apigee/apache-tomcat-idp/bin/startup.sh
+        RETVAL=$?
+        ;;
+  stop)
+        su -p -s /bin/sh $RUN_USER /opt/apigee/apache-tomcat-idp/bin/shutdown.sh
+        RETVAL=$?
+        ;;
+  restart)
+        su -p -s /bin/sh $RUN_USER /opt/apigee/apache-tomcat-idp/bin/shutdown.sh
+        su -p -s /bin/sh $RUN_USER /opt/apigee/apache-tomcat-idp/bin/startup.sh
+        RETVAL=$?
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=2
+        ;;
+esac
+exit $RETVAL

@@ -1,8 +1,6 @@
 #/bin/bash
-
 groupadd -r apigee
 useradd -r -g apigee -d /opt/apigee -s /sbin/nologin -c "Apigee platform user" apigee
-
 mkdir -p /opt/apigee/etc/
 touch /opt/apigee/etc/defaults.sh
 source /opt/apigee/etc/defaults.sh
@@ -10,6 +8,7 @@ source apigee-env.sh
 #This scripts downloads the latest version of tomcat and install under /opt/apigee directories
 curl -o /opt/apigee/apache-tomcat-8.5.34.tar.gz https://www-us.apache.org/dist/tomcat/tomcat-8/v8.5.34/bin/apache-tomcat-8.5.34.tar.gz
 tar -xvf /opt/apigee/apache-tomcat-8.5.34.tar.gz -C /opt/apigee/
+rm -fr /opt/apigee/apache-tomcat-8.5.34.tar.gz
 ln -s  /opt/apigee/apache-tomcat-8.5.34  /opt/apigee/apache-tomcat-idp
 cp -fr conf/server.xml /opt/apigee/apache-tomcat-idp/conf/server.xml
 mkdir -p /opt/apigee/apache-tomcat-idp/conf/Catalina/localhost/
@@ -24,14 +23,12 @@ sudo openssl req -x509 -sha256 -new -key key.pem -out cert.csr  -subj "/C=US/ST=
 r.com" -passin pass:Secret123
 sudo openssl x509 -sha256 -days 365 -in cert.csr -signkey key.pem -out cert.pem -passin pass:Secret123
 sudo openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -password pass:Secret123
-sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destkeystore cert.jks -deststoretype JKS -srcstorepass Secret123 -deststorepass S
-ecret123
-
+sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destkeystore cert.jks -deststoretype JKS -srcstorepass Secret123 -deststorepass Secret123
 ### Copying run scripts
-mkdir -p /opt/apigee/apache-tomcat/lib
-cp -fr apigee-env.sh /opt/apigee/apache-tomcat/lib/
-mkdir -p /opt/apigee/apache-tomcat/etc/init.d
-cp -fr apigee-internal-idp /opt/apigee/apache-tomcat/etc/init.d/
-chmod _+x /opt/apigee/apache-tomcat/etc/init.d/apigee-internal-idp
-chown -R ${RUN_USER}:${RUN_GROUP} /opt/apigee/apache-tomcat-idp
 cd -
+mkdir -p /opt/apigee/apache-tomcat-idp/lib
+cp -fr apigee-env.sh /opt/apigee/apache-tomcat-idp/lib/
+mkdir -p /opt/apigee/apache-tomcat-idp/etc/init.d
+cp -fr etc/init.d/apache-tomcat-idp /opt/apigee/apache-tomcat-idp/etc/init.d/
+chmod +x /opt/apigee/apache-tomcat-idp/etc/init.d/apache-tomcat-idp
+chown -R ${RUN_USER}:${RUN_GROUP} /opt/apigee/apache-tomcat-idp/
