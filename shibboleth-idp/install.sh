@@ -22,7 +22,7 @@ sleep 10
 ./bin/install.sh -Didp.src.dir=/opt/apigee/shibboleth-identity-provider-3.4.0 -Didp.target.dir=/opt/apigee/shibboleth-idp -Didp.host.name=${IDP_HOSTNAME}:${IDP_PORT} -Didp.keystore.password=${IDP_KEYSTORE_PASSWORD} -Didp.sealer.password=${IDP_SEALER_PASSWORD} -Didp.merge.properties=/tmp/idp.properties -Didp.noprompt=true
 
 cd -
-
+curl -o /opt/apigee/shibboleth-idp/edit-webapp/WEB-INF/lib/jstl-1.2.jar https://build.shibboleth.net/nexus/service/local/repositories/thirdparty/content/javax/servlet/jstl/1.2/jstl-1.2.jar
 cp -fr conf/* /opt/apigee/shibboleth-idp/conf/
 cp -fr messages/* /opt/apigee/shibboleth-idp/messages/
 sed -i "s|EDGE_UE_URL|$EDGE_UE_URL|g" /opt/apigee/shibboleth-idp/messages/messages.properties
