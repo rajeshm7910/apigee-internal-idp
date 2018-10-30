@@ -26,6 +26,8 @@ sudo openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -password 
 sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destkeystore cert.jks -deststoretype JKS -srcstorepass Secret123 -deststorepass Secret123
 ### Copying run scripts
 cd -
+echo 'export JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xmx2048m -XX:PermSize=32m"' > /opt/apigee/apache-tomcat-idp/bin/setenv.sh
+chmod +x /opt/apigee/apache-tomcat-idp/bin/setenv.sh
 mkdir -p /opt/apigee/apache-tomcat-idp/lib
 cp -fr apigee-env.sh /opt/apigee/apache-tomcat-idp/lib/
 mkdir -p /opt/apigee/apache-tomcat-idp/etc/init.d
