@@ -30,5 +30,5 @@ mkdir -p /opt/apigee/apache-tomcat-idp/lib
 cp -fr apigee-env.sh /opt/apigee/apache-tomcat-idp/lib/
 mkdir -p /opt/apigee/apache-tomcat-idp/etc/init.d
 cp -fr etc/init.d/apache-tomact-idp /opt/apigee/apache-tomcat-idp/etc/init.d/
-chmod +x /opt/apigee/apache-tomcat-idp/etc/init.d/apache-tomcat-idp
+chmod +x /opt/apigee/apache-tomcat-idp/etc/init.d/apache-tomact-idp
 chown -R ${RUN_USER}:${RUN_GROUP} /opt/apigee/apache-tomcat-idp/
