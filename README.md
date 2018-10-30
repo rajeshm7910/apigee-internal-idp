@@ -86,12 +86,12 @@ cd edge-management-ui
 
 ### Start Apigee Internal Idp Service 
 ```
-/opt/apigee/apache-tomcat-idp/etc/init.d/apigee-tomcat-idp start
+/opt/apigee/apache-tomcat-idp/etc/init.d/apache-tomact-idp start
 ```
 
 ### Stop Apigee Internal Idp Service 
 ```
-/opt/apigee/apache-tomcat-idp/etc/init.d/apigee-tomcat-idp stop
+/opt/apigee/apache-tomcat-idp/etc/init.d/apache-tomact-idp stop
 ```
 
 

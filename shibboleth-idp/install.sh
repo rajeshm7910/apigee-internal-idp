@@ -15,7 +15,13 @@ echo "idp.sealer.keyPassword=${IDP_SEALER_KEYPASSWORD}" >> /tmp/idp.properties
 echo "idp.sealer.storePassword=${IDP_SEALER_STOREPASSWORD}" >> /tmp/idp.properties
 echo "idp.entityID=${IDP_SCHEME}://${IDP_HOSTNAME}:${IDP_PORT}/idp/shibboleth" >> /tmp/idp.properties
 echo "idp.scope=${IDP_HOSTNAME}" >> /tmp/idp.properties
+
+cat  /tmp/idp.properties
+sleep 10
+
 ./bin/install.sh -Didp.src.dir=/opt/apigee/shibboleth-identity-provider-3.4.0 -Didp.target.dir=/opt/apigee/shibboleth-idp -Didp.host.name=${IDP_HOSTNAME}:${IDP_PORT} -Didp.keystore.password=${IDP_KEYSTORE_PASSWORD} -Didp.sealer.password=${IDP_SEALER_PASSWORD} -Didp.merge.properties=/tmp/idp.properties -Didp.noprompt=true
+
+cd -
 
 cp -fr conf/* /opt/apigee/shibboleth-idp/conf/
 cp -fr messages/* /opt/apigee/shibboleth-idp/messages/
