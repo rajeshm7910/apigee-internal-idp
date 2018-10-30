@@ -13,6 +13,10 @@ Further the local idp can either connect to openldap that comes with Apigee Inst
 ## Getting Started
 
 
+### Install Java and Set the JAVA_HOME 
+
+sudo yum install java-1.8.0-openjdk -y
+
 ### Install Tomcat
 
 ```
@@ -23,9 +27,33 @@ cd apigee-tomcat
 
 ### Configure Tomcat with certificate
 
-Tomcat is installed with self signed certiticates in the install step. Use
+Tomcat is installed with a self signed certiticates in the install step. You can create jks from your certs and key by using these commands
 
-### Install shibboleth binaries
+
+```
+cd /opt/apigee/apache-tomcat-idp/conf/certs
+```
+
+- Self Signed
+```
+sudo openssl genrsa -aes256 -passout pass:Secret123 -out key.pem 2048
+sudo openssl rsa -in key.pem -passin pass:Secret123  -out key.pem
+sudo openssl req -x509 -sha256 -new -key key.pem -out cert.csr  -subj "/C=US/ST=FooState/L=FooLocation/O=Foobar/OU=FooUnit/CN=Foobar.com/emailAddress=foo@ba
+r.com" -passin pass:Secret123
+sudo openssl x509 -sha256 -days 365 -in cert.csr -signkey key.pem -out cert.pem -passin pass:Secret123
+```
+- Change to p12 format 
+```
+sudo openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -password pass:Secret123
+```
+- Change to keystore format from p12 cert. Specify other parameter as needed.
+```
+sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destkeystore cert.jks -deststoretype JKS -srcstorepass Secret123 -deststorepass Secret123
+```
+
+### Install shibboleth
+
+
 
 
 ## License
