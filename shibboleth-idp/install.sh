@@ -28,5 +28,6 @@ cp -fr messages/* /opt/apigee/shibboleth-idp/messages/
 sed -i "s|EDGE_UE_URL|$EDGE_UE_URL|g" /opt/apigee/shibboleth-idp/messages/messages.properties
 cp -fr views/* /opt/apigee/shibboleth-idp/views/
 cp -fr webapp/css/* /opt/apigee/shibboleth-idp/edit-webapp/css/
+cp -fr dist/webapps/WEB-INF/web.xml /opt/apigee/shibboleth-idp/dist/webapps/WEB-INF/web.xml
 /opt/apigee/shibboleth-idp/bin/build.sh -Didp.target.dir=/opt/apigee/shibboleth-idp
 chown -R ${RUN_USER}:${RUN_GROUP} /opt/apigee/shibboleth-idp/
