@@ -31,6 +31,7 @@ Tomcat is installed with a self signed certiticates in the install step. You can
 
 
 ```
+mkdir -p /opt/apigee/apache-tomcat-idp/conf/certs
 cd /opt/apigee/apache-tomcat-idp/conf/certs
 ```
 
@@ -52,6 +53,30 @@ sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destk
 ```
 
 ### Install shibboleth
+
+- Create a config file and install shibboleth with the config file
+
+```
+IDP_HOSTNAME=localhost
+IDP_PORT=8443
+IDP_SCHEME=https
+IDP_KEYSTORE_PASSWORD=Secret123
+IDP_SEALER_KEYPASSWORD=Secret123
+IDP_SEALER_STOREPASSWORD=Secret123
+EDGE_UE_URL=http://146.148.109.38:3001
+APIGEE_SSO_URL=http://146.148.109.38:9099
+ADMIN_EMAIL=opdk@apigee.com
+APIGEE_ADMINPW=Secret123
+```
+
+- Install shibboleth
+
+```
+cd shibboleth-idp
+./install.sh idp-config.txt
+```
+
+### Start Tomcat Service 
 
 
 
