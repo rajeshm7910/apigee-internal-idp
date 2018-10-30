@@ -15,8 +15,11 @@ Further the local idp can either connect to openldap that comes with Apigee Inst
 
 ### Install Tomcat
 
+```
 cd apigee-tomcat
 ./install.sh
+```
+
 
 ### Configure Tomcat with certificate
 
