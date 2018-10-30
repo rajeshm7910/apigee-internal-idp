@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+APIGEE_ROOT=/opt/apigee
+source $APIGEE_ROOT/apache-tomcat-idp/lib/apigee-env.sh
+
+case "$1" in
+  start|stop|status|restart)
+        su -c "$APIGEE_ROOT/apache-tomcat/bin/startup.sh $1" $RUN_USER
+        RETVAL=$?
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=2
+        ;;
+esac
+exit $RETVAL
+
+

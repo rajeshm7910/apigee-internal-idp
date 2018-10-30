@@ -21,10 +21,9 @@ echo "idp.scope=${IDP_HOSTNAME}" >> /tmp/idp.properties
 ./bin/install.sh -Didp.src.dir=/opt/apigee/shibboleth-identity-provider-3.4.0 -Didp.target.dir=/opt/apigee/shibboleth-idp -Didp.host.name=${IDP_HOSTNAME}:${IDP_PORT} -Didp.keystore.password=${IDP_KEYSTORE_PASSWORD}  -Didp.sealer.password=${IDP_SEALER_PASSWORD} -Didp.merge.properties=/tmp/idp.properties -Didp.noprompt=true
 cp -fr conf/* /opt/apigee/shibboleth-idp/conf/
 cp -fr messages/* /opt/apigee/shibboleth-idp/messages/
+sed -i.bak s/EDGE_UE_URL/${EDGE_UE_URL}/g /opt/apigee/shibboleth-idp/messages/messages.properties
 cp -fr views/* /opt/apigee/shibboleth-idp/views/
 cp -fr webapp/css/* /opt/apigee/shibboleth-idp/edit-webapp/css/
 /opt/apigee/shibboleth-idp/bin/build.sh -Didp.target.dir=/opt/apigee/shibboleth-idp
 chown -R ${RUN_USER}:${RUN_GROUP} /opt/apigee/shibboleth-idp/
 cd -
-
-

@@ -26,5 +26,12 @@ sudo openssl x509 -sha256 -days 365 -in cert.csr -signkey key.pem -out cert.pem 
 sudo openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -password pass:Secret123
 sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destkeystore cert.jks -deststoretype JKS -srcstorepass Secret123 -deststorepass S
 ecret123
+
+### Copying run scripts
+mkdir -p /opt/apigee/apache-tomcat/lib
+cp -fr apigee-env.sh /opt/apigee/apache-tomcat/lib/
+mkdir -p /opt/apigee/apache-tomcat/etc/init.d
+cp -fr apigee-internal-idp /opt/apigee/apache-tomcat/etc/init.d/
+chmod _+x /opt/apigee/apache-tomcat/etc/init.d/apigee-internal-idp
 chown -R ${RUN_USER}:${RUN_GROUP} /opt/apigee/apache-tomcat-idp
 cd -

@@ -76,8 +76,15 @@ cd shibboleth-idp
 ./install.sh idp-config.txt
 ```
 
-### Start Tomcat Service 
+### Start Apigee Internal Idp Service 
+```
+/opt/apigee/apache-tomcat-idp/etc/init.d/apigee-internal-idp start
+```
 
+### Stop Apigee Internal Idp Service 
+```
+/opt/apigee/apache-tomcat-idp/etc/init.d/apigee-internal-idp stop
+```
 
 
 
