@@ -5,6 +5,7 @@ IDP_SEALER_PASSWORD=Secret123
 IDP_KEYSTORE_PASSWORD=Secret123
 IDP_SEALER_KEYPASSWORD=Secret123
 IDP_SEALER_STOREPASSWORD=Secret123
+#Points to LDAP Host that gets installed with Apigee. In case of external ldap it should point to external ldap
 LDAP_HOSTNAME=localhost
 LDAP_PRT=10389
 EDGE_UE_URL=http://146.148.109.38:3001

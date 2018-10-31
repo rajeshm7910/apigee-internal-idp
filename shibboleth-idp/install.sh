@@ -27,6 +27,10 @@ curl -o /opt/apigee/shibboleth-idp/edit-webapp/WEB-INF/lib/jstl-1.2.jar https://
 cp -fr conf/* /opt/apigee/shibboleth-idp/conf/
 cp -fr messages/* /opt/apigee/shibboleth-idp/messages/
 sed -i "s|EDGE_UE_URL|$EDGE_UE_URL|g" /opt/apigee/shibboleth-idp/messages/messages.properties
+sed -i "s|Secret123|$APIGEE_ADMINPW|g" /opt/apigee/shibboleth-idp/conf/ldap.properties
+sed -i "s|localhost|$LDAP_HOSTNAME|g" /opt/apigee/shibboleth-idp/conf/ldap.properties
+sed -i "s|10389|$LDAP_PORT|g" /opt/apigee/shibboleth-idp/conf/ldap.properties
+
 cp -fr views/* /opt/apigee/shibboleth-idp/views/
 cp -fr webapp/css/* /opt/apigee/shibboleth-idp/edit-webapp/css/
 cp -fr dist/webapp/WEB-INF/web.xml /opt/apigee/shibboleth-idp/dist/webapp/WEB-INF/web.xml
