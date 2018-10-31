@@ -83,7 +83,9 @@ cd shibboleth-idp
 ./install.sh idp-config.txt
 ```
 
-### Changes routes in edge-management-ui box
+### Changes routes in edge-management-ui
+
+There are some changes in routes that needs to be done to allow forgot password link to work. This script needs to be executed in the new edge ue box.
 
 ```
 cd edge-management-ui
@@ -112,6 +114,10 @@ curl -k https://<idp-hostname>:<idp-port>/idp/shibboleth
 ### Configue UE with this idp
 
 Follow the documentation [here] https://docs.apigee.com/private-cloud/v4.18.05/installing-beta-release-edge-new-unified-experience
+
+
+### Run user
+The current installation runs the idp as apigee user. To change it, edit apigee-env.sh in both apache-tomcat and shibboleth-idp and redo the install.sh script.
 
 
 ## License
