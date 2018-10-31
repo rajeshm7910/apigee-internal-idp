@@ -7,11 +7,15 @@ Apigee UE for OPDK comes with only SAML SSO. To adopt this for an on premise cus
 Further the local idp can either connect to openldap that comes with Apigee Installation or to your own directory services. Thus it makes the Apigee Edge UE available to on-premise for all customer base.
 
 
-## Architecture 
-
 
 ## Getting Started
 
+
+### Supported/Tested Software
+
+- centos 7.x
+- open jdk 1.8
+- Tomcat 8.5.34
 
 ### Install Java and Set the JAVA_HOME 
 
