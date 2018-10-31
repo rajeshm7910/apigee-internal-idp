@@ -4,8 +4,7 @@
 
 Apigee UE for OPDK comes with only SAML SSO. To adopt this for an on premise customer, they need have an IDP whch supports SAML2 SSO. This project tries to help you deploy an shibboleth idp and configure  EdgeUE with a local idp server
 
-Further the local idp can either connect to openldap that comes with Apigee Installation or to your own directory services. Thus it makes the Apigee Edge UE available to on-premise for all customer base.
-
+Further the local idp can either connect to openldap that comes with Apigee Installation or to your own directory service. Thus it makes the Apigee Edge UE available to on-premise for customer base who don't have an SAML2 based IDP.
 
 
 ## Getting Started
@@ -28,7 +27,8 @@ export JAVA_HOME=/usr/lib/jvm/jre
 ```
 - Edge Setup
 
-There should be existing edge setup. The idp hooks to the same openldap that comes installed with edge. The idp can be installed on same machine as edge management server or you can do an aio.
+There should be existing edge setup. The idp hooks to the same openldap that comes installed with edge. The idp can be installed on same machine as edge management server or you can install idp on an aio setup.
+
 ### Install Tomcat
 
 ```

@@ -1,14 +1,15 @@
+#Public hostname of IDP hostname
 IDP_HOSTNAME=146.148.109.38
+#The port on which the idp server is running
 IDP_PORT=8443
+# The scheme, in general its https
 IDP_SCHEME=https
 IDP_SEALER_PASSWORD=Secret123
 IDP_KEYSTORE_PASSWORD=Secret123
 IDP_SEALER_KEYPASSWORD=Secret123
 IDP_SEALER_STOREPASSWORD=Secret123
-#Points to LDAP Host that gets installed with Apigee. In case of external ldap it should point to external ldap
+#Points to LDAP Host that gets installed with Apigee. In case of external ldap it should point to external ldap. In case its aio setup its localhost
 LDAP_HOSTNAME=localhost
-LDAP_PRT=10389
+LDAP_PORT=10389
 EDGE_UE_URL=http://146.148.109.38:3001
-APIGEE_SSO_URL=http://146.148.109.38:9099
-ADMIN_EMAIL=opdk@apigee.com
 APIGEE_ADMINPW=Secret123
