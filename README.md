@@ -17,11 +17,18 @@ Further the local idp can either connect to openldap that comes with Apigee Inst
 - open jdk 1.8
 - Tomcat 8.5.34
 
-### Install Java and Set the JAVA_HOME 
-
+### Prerequisites
+- Install java 1.8
+```
 sudo yum install java-1.8.0-openjdk -y
+```
+- Set JAVA_HOME 
+```
+export JAVA_HOME=/usr/lib/jvm/jre
+```
+- Edge Setup
 
-
+There should be existing edge setup. The idp hooks to the same openldap that comes installed with edge. The idp can be installed on same machine as edge management server or you can do an aio.
 ### Install Tomcat
 
 ```
