@@ -79,12 +79,13 @@ sudo keytool -importkeystore -srckeystore cert.p12  -srcstoretype PKCS12  -destk
 IDP_HOSTNAME=<public hostname>
 IDP_PORT=8443
 IDP_SCHEME=https
+IDP_SEALER_PASSWORD=Secret123
 IDP_KEYSTORE_PASSWORD=Secret123
 IDP_SEALER_KEYPASSWORD=Secret123
 IDP_SEALER_STOREPASSWORD=Secret123
+LDAP_HOSTNAME=localhost
+LDAP_PORT=10389
 EDGE_UE_URL=http://<hostname>:3001
-APIGEE_SSO_URL=http://<apigee-sso-hostname>:9099
-ADMIN_EMAIL=opdk@apigee.com
 APIGEE_ADMINPW=Secret123
 ```
 
