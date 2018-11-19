@@ -7,7 +7,7 @@ source /opt/apigee/etc/defaults.sh
 source apigee-env.sh
 source $1
 #This scripts downloads the latest version of tomcat and install under /opt/apigee directories
-curl -o /opt/apigee/shibboleth-identity-provider-3.4.0.tar.gz https://shibboleth.net/downloads/identity-provider/latest/shibboleth-identity-provider-3.4.0.tar.gz
+curl -o /opt/apigee/shibboleth-identity-provider-3.4.0.tar.gz https://shibboleth.net/downloads/identity-provider/3.4.0/shibboleth-identity-provider-3.4.0.tar.gz
 tar -xvf /opt/apigee/shibboleth-identity-provider-3.4.0.tar.gz -C /opt/apigee/
 rm -fr /opt/apigee/shibboleth-identity-provider-3.4.0.tar.gz
 cd /opt/apigee/shibboleth-identity-provider-3.4.0
