@@ -1,0 +1,34 @@
+##
+## Velocity Template for mdquery Utility Output
+##
+## Velocity context will contain the following properties
+## flowRequestContext - the Spring Web Flow RequestContext
+## request - HttpServletRequest
+## response - HttpServletResponse
+## profileRequestContext
+## XMLObjectSupport
+## SerializeSupport
+## environment - Spring Environment object for property resolution
+## custom - arbitrary object injected by deployer
+##
+#if ($flowRequestContext.getCurrentEvent() and !$flowRequestContext.getCurrentEvent().getId().equals("proceed"))
+$flowRequestContext.getCurrentEvent().getId()
+$response.setContentType("text/plain")
+$response.setStatus(500)
+#stop
+#end
+#if ($profileRequestContext.getInboundMessageContext())
+#set ($peerCtx = $profileRequestContext.getInboundMessageContext().getSubcontext("org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext"))
+#if ($peerCtx)
+#set ($mdCtx = $peerCtx.getSubcontext("org.opensaml.saml.common.messaging.context.SAMLMetadataContext"))
+#if ($mdCtx && $mdCtx.getEntityDescriptor())
+$SerializeSupport.prettyPrintXML($XMLObjectSupport.marshall($mdCtx.getEntityDescriptor()))
+$response.setContentType("text/xml")
+$response.setStatus(200)
+#stop
+#end
+#end
+#end
+Not Found
+$response.setContentType("text/plain")
+$response.setStatus(404)

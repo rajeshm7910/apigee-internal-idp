@@ -1,0 +1,83 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+      parent="intercept.abstract">
+
+    <!-- Rudimentary impediment to direct execution of subflow. -->
+    <input name="calledAsSubflow" type="boolean" required="true" />
+
+
+    <!-- Attribute consent setup. -->
+    
+    <on-start>
+        <evaluate expression="AttributeConsentFlowDescriptorLookupStrategy.apply(opensamlProfileRequestContext)"
+            result="flowScope.attributeReleaseFlowDescriptor" />
+    </on-start>
+
+    <action-state id="AttributeConsentSetup">
+        <evaluate expression="InitializeConsentContext" />
+        <evaluate expression="InitializeAttributeConsentContext" />
+        <evaluate expression="PopulateAttributeConsentContext" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="ReadConsentFromStorage" />
+    </action-state>
+
+
+    <!-- Read consent from storage. -->
+
+    <action-state id="ReadConsentFromStorage">
+        <evaluate expression="ReadAttributeReleaseConsentFromStorage" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="TestForReadGlobalAttributeConsentFromStorage" />
+    </action-state>
+
+    <decision-state id="TestForReadGlobalAttributeConsentFromStorage">
+        <if test="attributeReleaseFlowDescriptor.globalConsentAllowed"
+            then="ReadGlobalAttributeConsentFromStorage" else="CheckPreviousConsents" />
+    </decision-state>
+
+    <action-state id="ReadGlobalAttributeConsentFromStorage">
+        <evaluate expression="ReadAttributeReleaseGlobalConsentFromStorage" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="TestForGlobalAttributeConsent" />
+    </action-state> 
+
+    <!-- If global consent has been given by user, skip the rest of the flow. -->
+    
+    <decision-state id="TestForGlobalAttributeConsent">
+        <if test="GlobalAttributeConsentPredicate.apply(opensamlProfileRequestContext)"
+            then="proceed" else="CheckPreviousConsents" />
+    </decision-state>
+    
+    <!-- If neither consent nor global consent was given previously, return an error -->
+    <decision-state id="CheckPreviousConsents">
+        <if test="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.consent.context.ConsentContext)).getPreviousConsents().isEmpty()"
+            then="InvalidProfileContext"
+            else="ReleaseAttributes" />
+    </decision-state>
+
+
+    <!-- Release attributes consented to as well as non-consentable attributes from attribute context. -->
+
+    <action-state id="ReleaseAttributes">
+        <evaluate expression="ReleaseAttributes" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="proceed" />
+    </action-state>
+
+    <end-state id="proceed" />
+
+
+    <global-transitions>
+        <!-- Catch "InvalidAttributeContext" and short-circuit this intercept flow. -->
+        <transition on="InvalidAttributeContext" to="proceed" />
+    </global-transitions>
+
+    <bean-import resource="attribute-release-beans.xml" />
+    <bean-import resource="attribute-release-query-beans.xml" />
+
+</flow>

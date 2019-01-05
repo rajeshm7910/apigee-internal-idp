@@ -1,0 +1,74 @@
+04-Jan-2019 01:00:07.367 SEVERE [main] org.apache.catalina.startup.Catalina.initDirs Cannot find specified temporary folder at [/opt/apigee/apigee-internal-idp/temp]
+04-Jan-2019 01:00:07.900 WARNING [main] org.apache.tomcat.util.net.SSLHostConfig.setProtocols The protocol [TLSv1.1] was added to the list of protocols on the SSLHostConfig named [_default_]. Check if a +/- prefix is missing.
+04-Jan-2019 01:00:07.901 WARNING [main] org.apache.tomcat.util.net.SSLHostConfig.setProtocols The protocol [TLSv1.2] was added to the list of protocols on the SSLHostConfig named [_default_]. Check if a +/- prefix is missing.
+04-Jan-2019 01:00:07.963 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version:        Apache Tomcat/8.5.37
+04-Jan-2019 01:00:07.963 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Dec 12 2018 12:07:02 UTC
+04-Jan-2019 01:00:07.963 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server number:         8.5.37.0
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Linux
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            3.10.0-862.14.4.el7.x86_64
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.191.b12-1.el7_6.x86_64/jre
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           1.8.0_191-b12
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         /opt/apigee/apigee-internal-idp-4.18.05-0.0.0
+04-Jan-2019 01:00:07.964 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         /opt/apigee/apigee-tomcat-idp-8.5.37
+04-Jan-2019 01:00:07.965 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=/opt/apigee/apigee-internal-idp/conf/logging.properties
+04-Jan-2019 01:00:07.965 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+04-Jan-2019 01:00:07.965 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dlogback.config.file=/opt/apigee/apigee-internal-idp/conf/logback.xml
+04-Jan-2019 01:00:07.965 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.security.egd=file:/dev/./urandom
+04-Jan-2019 01:00:07.965 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Xms1024m
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Xmx2048m
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -XX:PermSize=32m
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.port=1099
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.authenticate=false
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.ssl=false
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dlogback.config.file=/opt/apigee/apigee-internal-idp/conf/logback.xml
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.security.egd=file:/dev/./urandom
+04-Jan-2019 01:00:07.966 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Xms1024m
+04-Jan-2019 01:00:07.967 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Xmx2048m
+04-Jan-2019 01:00:07.967 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -XX:PermSize=32m
+04-Jan-2019 01:00:07.978 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote
+04-Jan-2019 01:00:07.978 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.port=1099
+04-Jan-2019 01:00:07.978 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.authenticate=false
+04-Jan-2019 01:00:07.979 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.ssl=false
+04-Jan-2019 01:00:07.979 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dlogback.config.file=/opt/apigee/apigee-internal-idp/conf/logback.xml
+04-Jan-2019 01:00:07.979 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.security.egd=file:/dev/./urandom
+04-Jan-2019 01:00:07.979 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Xms1024m
+04-Jan-2019 01:00:07.979 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Xmx2048m
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -XX:PermSize=32m
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.port=1099
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.authenticate=false
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcom.sun.management.jmxremote.ssl=false
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djdk.tls.ephemeralDHKeySize=2048
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.protocol.handler.pkgs=org.apache.catalina.webresources
+04-Jan-2019 01:00:07.980 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dorg.apache.catalina.security.SecurityListener.UMASK=0027
+04-Jan-2019 01:00:07.981 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dignore.endorsed.dirs=
+04-Jan-2019 01:00:07.981 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=/opt/apigee/apigee-internal-idp
+04-Jan-2019 01:00:07.981 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=/opt/apigee/apigee-tomcat-idp
+04-Jan-2019 01:00:07.981 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=/opt/apigee/apigee-internal-idp/temp
+04-Jan-2019 01:00:07.981 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent The APR based Apache Tomcat Native library which allows optimal performance in production environments was not found on the java.library.path: [/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib]
+04-Jan-2019 01:00:08.148 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-9090"]
+04-Jan-2019 01:00:08.164 INFO [main] org.apache.tomcat.util.net.NioSelectorPool.getSharedSelector Using a shared selector for servlet write/read
+04-Jan-2019 01:00:08.184 INFO [main] org.apache.catalina.startup.Catalina.load Initialization processed in 817 ms
+04-Jan-2019 01:00:08.225 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+04-Jan-2019 01:00:08.226 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet Engine: Apache Tomcat/8.5.37
+04-Jan-2019 01:00:08.244 INFO [localhost-startStop-1] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying configuration descriptor [/opt/apigee/apigee-internal-idp-4.18.05-0.0.0/conf/Catalina/localhost/idp.xml]
+04-Jan-2019 01:00:08.313 WARNING [localhost-startStop-1] org.apache.tomcat.util.digester.SetPropertiesRule.begin [SetPropertiesRule]{Context/CookieProcessor} Setting property 'alwaysAddExpires' to 'true' did not find a matching property.
+04-Jan-2019 01:00:13.868 INFO [localhost-startStop-1] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+04-Jan-2019 01:00:25.199 INFO [localhost-startStop-1] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of configuration descriptor [/opt/apigee/apigee-internal-idp-4.18.05-0.0.0/conf/Catalina/localhost/idp.xml] has finished in [16,947] ms
+04-Jan-2019 01:00:25.202 INFO [localhost-startStop-1] org.apache.catalina.startup.HostConfig.deployDirectory Deploying web application directory [/opt/apigee/apigee-internal-idp-4.18.05-0.0.0/webapps/ROOT]
+04-Jan-2019 01:00:25.225 INFO [localhost-startStop-1] org.apache.catalina.startup.HostConfig.deployDirectory Deployment of web application directory [/opt/apigee/apigee-internal-idp-4.18.05-0.0.0/webapps/ROOT] has finished in [23] ms
+04-Jan-2019 01:00:25.406 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-9090"]
+04-Jan-2019 01:00:25.449 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in 17265 ms
+04-Jan-2019 02:07:09.018 INFO [Thread-15] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-9090"]
+04-Jan-2019 02:07:09.047 INFO [Thread-15] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+04-Jan-2019 02:07:09.178 WARNING [localhost-startStop-2] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesThreads The web application [idp] appears to have started a thread named [AsyncAppender-Worker-ASYNC_PROCESS] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:403)
+ ch.qos.logback.core.AsyncAppenderBase$Worker.run(AsyncAppenderBase.java:289)
+04-Jan-2019 02:07:09.205 INFO [Thread-15] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-9090"]
+04-Jan-2019 02:07:09.212 INFO [Thread-15] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-9090"]

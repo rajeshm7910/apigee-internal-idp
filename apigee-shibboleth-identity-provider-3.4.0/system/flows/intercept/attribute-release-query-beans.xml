@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <!-- Use 'intercept/attribute-release' as storage context. -->
+
+    <bean id="AttributeReleaseStorageContextLookupStrategy" class="com.google.common.base.Functions"
+        factory-method="constant" c:_0="intercept/attribute-release" />
+
+    <bean id="ReadAttributeReleaseConsentFromStorage"
+        class="net.shibboleth.idp.consent.flow.storage.impl.ReadConsentFromStorage" scope="prototype"
+        p:storageKeyLookupStrategy-ref="shibboleth.consent.UserAndRelyingPartyStorageKey"
+        p:storageSerializer-ref="shibboleth.consent.ConsentSerializer"
+        p:storageContextLookupStrategy-ref="AttributeReleaseStorageContextLookupStrategy" />
+
+    <bean id="ReadAttributeReleaseGlobalConsentFromStorage"
+        class="net.shibboleth.idp.consent.flow.storage.impl.ReadConsentFromStorage" scope="prototype"
+        p:storageKeyLookupStrategy-ref="shibboleth.consent.UserStorageKey"
+        p:storageContextLookupStrategy-ref="AttributeReleaseStorageContextLookupStrategy" />
+
+</beans>

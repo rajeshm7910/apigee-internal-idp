@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"       
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <import resource="../../../conf/intercept/impersonate-intercept-config.xml" />
+
+    <bean id="CheckGeneralAccess"
+        class="org.opensaml.profile.action.impl.CheckAccess" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest"
+        p:accessControlService-ref="shibboleth.AccessControlService"
+        p:policyName-ref="shibboleth.impersonate.GeneralPolicy"
+        p:operation="impersonate" />
+
+    <bean id="CheckSpecificAccess"
+        class="org.opensaml.profile.action.impl.CheckAccess" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest"
+        p:accessControlService-ref="shibboleth.AccessControlService"
+        p:policyName-ref="shibboleth.impersonate.SpecificPolicy"
+        p:operation="impersonate"
+        p:resourceLookupStrategy-ref="FlowScopePrincipalLookup" />
+
+    <bean id="FlowScopePrincipalLookup" parent="shibboleth.ContextFunctions.Expression"
+        c:outputType="#{T(java.lang.String)}"
+        c:expression="#input.getSubcontext(T(net.shibboleth.idp.profile.context.SpringRequestContext)).getRequestContext().getRequestScope().get('principalToSpoof')" />
+
+    <bean id="ResolveAttributes" class="net.shibboleth.idp.profile.impl.ResolveAttributes" scope="prototype"
+        c:resolverService-ref="shibboleth.AttributeResolverService"
+        p:resolutionLabel="intercept/impersonate"
+        p:maskFailures="%{idp.service.attribute.resolver.maskFailures:true}" />
+
+    <bean id="FilterAttributes" class="net.shibboleth.idp.profile.impl.FilterAttributes" scope="prototype"
+        c:filterService-ref="shibboleth.AttributeFilterService"
+        p:maskFailures="%{idp.service.attribute.filter.maskFailures:true}"
+        p:metadataResolver-ref="shibboleth.MetadataResolver" />
+        
+    <import resource="../../conf/audit-system.xml" />
+    
+    <bean id="PopulateAuditContext" parent="shibboleth.AbstractPopulateAuditContext" scope="prototype">
+        <property name="fieldExtractors">
+		    <map>
+		        <entry>
+		            <key>
+		                <util:constant static-field="net.shibboleth.idp.profile.IdPAuditFields.IMPERSONATING_USERNAME"/>
+		            </key>
+                    <bean class="com.google.common.base.Functions" factory-method="compose">
+                        <constructor-arg name="g">
+                            <bean class="net.shibboleth.idp.authn.context.navigate.SubjectContextImpersonatingPrincipalLookupFunction" />
+                        </constructor-arg>
+                        <constructor-arg name="f">
+                            <ref bean="shibboleth.ChildLookup.SubjectContext" />
+                        </constructor-arg>    
+                    </bean>
+		        </entry>
+		    </map>
+        </property>
+    </bean>
+
+</beans>

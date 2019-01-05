@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize"
+    default-destroy-method="destroy">
+
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <import resource="admin-abstract-beans.xml" />
+
+    <!-- Profile ID for flow. -->    
+    <bean id="shibboleth.AdminProfileId" class="java.lang.String" c:_0="http://shibboleth.net/ns/profiles/unlock-keys" />
+    
+    <!-- Default operation/resource suppliers for access checks. -->
+
+    <bean id="shibboleth.AdminOperationLookupStrategy" class="com.google.common.base.Functions"
+        factory-method="constant" c:_0="unlock" />
+        
+    <bean id="shibboleth.AdminResourceLookupStrategy" class="com.google.common.base.Functions"
+        factory-method="constant" c:_0="keys" />
+    
+    <!--  Work beans. -->
+        
+    <bean id="UnlockDataSealers" class="net.shibboleth.idp.admin.impl.UnlockDataSealers" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest"
+        p:keyStrategies="#{getObject('shibboleth.unlock-keys.KeyStrategies')}" />
+
+    <bean id="UnlockPrivateKeys" class="net.shibboleth.idp.admin.impl.UnlockPrivateKeys" scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest"
+        p:credentials="#{getObject('shibboleth.unlock-keys.Credentials')}"
+        p:keyResources="#{getObject('shibboleth.unlock-keys.PrivateKeys')}" />
+        
+</beans>

@@ -1,0 +1,65 @@
+#!/bin/bash
+source "${APIGEE_ROOT}/apigee-lib/apigee-lib.sh" || exit 1
+source "${APIGEE_ROOT}/apigee-lib/dofflag.sh" || exit 1
+source "${COMPONENT_ROOT}"/lib/sso-lib.sh || exit 1
+CUSTOMER_TOKEN_DIR="${APIGEE_ROOT}/customer/application"
+CUSTOMER_TOKEN_FILE="${CUSTOMER_TOKEN_DIR}/${APPLICATION}.properties"
+APP_TOKEN_DIR="${APIGEE_ROOT}/token/application"
+APP_TOKEN_FILE="${APP_TOKEN_DIR}/${APPLICATION}.properties"
+HOST="localhost"
+if [[ -f ${CUSTOMER_TOKEN_FILE} ]]; then
+ PORT=$(get_property "${CUSTOMER_TOKEN_FILE}" "conf_server_tomcat_listen_port")
+ PORT_RET=$?
+ if [[ ${PORT_RET} -gt 0 || -z ${PORT} ]]; then
+  PORT=$(get_property "${APP_TOKEN_FILE}" "conf_server_tomcat_listen_port")
+  PORT_RET=$?
+  if [[ ${PORT_RET} -gt 0 || -z ${PORT} ]]; then
+    PORT=9090
+  fi
+ fi
+else
+ PORT=$(get_property "${APP_TOKEN_FILE}" "conf_server_tomcat_listen_port")
+ PORT_RET=$?
+ if [[ ${PORT_RET} -gt 0 || -z ${PORT} ]]; then
+   PORT=9099
+ fi
+fi
+
+if [[ -f ${CUSTOMER_TOKEN_FILE} ]]; then
+  SSL_ENABLED=$(get_property "${CUSTOMER_TOKEN_FILE}" "conf_server_tomcat_ssl_enabled")
+  SSL_ENABLED_RET=$?
+  if [[ ${SSL_ENABLED_RET} -gt 0 || -z ${SSL_ENABLED} ]]; then
+    SSL_ENABLED=$(get_property "${APP_TOKEN_FILE}" "conf_server_tomcat_ssl_enabled")
+    SSL_ENABLED_RET=$?
+    if [[ ${SSL_ENABLED_RET} -gt 0 || -z ${SSL_ENABLED} ]]; then
+      SSL_ENABLED="false"
+    fi
+  fi
+else
+  SSL_ENABLED=$(get_property "${APP_TOKEN_FILE}" "conf_server_tomcat_ssl_enabled")
+  SSL_ENABLED_RET=$?
+  if [[ ${SSL_ENABLED_RET} -gt 0 || -z ${SSL_ENABLED} ]]; then
+    SSL_ENABLED="false"
+  fi
+fi
+
+do_wait_for_ready()
+{
+  local i=0
+  while ((i < ${START_TIMEOUT:-90})); do
+    if [[ ${SSL_ENABLED} == "true" ]]; then
+      RESPONSE=$(curl -k -s -o /dev/null -w '%{http_code}' "https://${HOST}:${PORT}/healthz")
+    else
+      RESPONSE=$(curl -s -o /dev/null -w '%{http_code}' "http://${HOST}:${PORT}/healthz")
+    fi
+    if [ ${RESPONSE} -eq 200 ]; then
+      notice "$COMPONENT_NAME is ready"
+      return "$STATUS_OK"
+    fi
+    sleep 1
+    ((++i))
+  done
+  notice "wait_for_ready timed out"
+  return "$STATUS_FAIL"
+}
+do_wait_for_ready "$@"

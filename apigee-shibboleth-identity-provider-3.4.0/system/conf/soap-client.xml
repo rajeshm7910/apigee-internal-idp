@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:c="http://www.springframework.org/schema/c" 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:schemaLocation="http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context   http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util      http://www.springframework.org/schema/util/spring-util.xsd"
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+    
+    
+    <!-- Aliases used for wiring, especially by other components. In case we want to switch strategies, can do it here -->
+    <alias alias="shibboleth.SOAPClient.SAML" name="SOAPClient.SAML.LocatorMap" />
+    <alias alias="SOAPClient.SAML.HttpClient" name="SOAPClient.HttpClient" />
+    
+
+    <!-- SOAP client and pipeline factory definitions. -->
+         
+    <bean id="SOAPClient.SAML.LocatorMap" class="org.opensaml.soap.client.http.PipelineFactoryHttpSOAPClient">
+        <property name="httpClient" ref="SOAPClient.SAML.HttpClient" />
+        <property name="pipelineFactory" ref="SOAPClient.PipelineFactory.LocatorMap" />
+    </bean>
+    
+    <!-- Pipeline-based SOAP client which selects factory dynamically based on serviceMappings below. -->
+    <bean id="SOAPClient.PipelineFactory.LocatorMap" class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
+        <property name="serviceLocatorInterface" value="org.opensaml.messaging.pipeline.httpclient.HttpClientMessagePipelineFactory" />
+        <property name="serviceMappings">
+            <props>
+                <prop key="SAML2.ArtifactDecoder">SOAPClient.SAML2.Pipeline</prop>
+            </props>
+        </property>
+    </bean>
+    
+    
+    <!-- Pipelines. -->
+    
+    <!-- A base abstract pipeline bean for SAML 2.  The encoder and decoder are always going to be the same so factor out to a parent bean.
+         IMPORTANT: actual instances of this bean and the encoder/decoder below MUST be prototypes, as they are per-request instance. -->
+    <bean id="SOAPClient.SAML2.Pipeline.Abstract" abstract="true" class="org.opensaml.messaging.pipeline.httpclient.BasicHttpClientMessagePipeline">
+        <constructor-arg>
+            <bean scope="prototype" init-method="" class="org.opensaml.saml.saml2.binding.encoding.impl.HttpClientRequestSOAP11Encoder" />
+        </constructor-arg>
+        <constructor-arg>
+            <bean scope="prototype" init-method="" class="org.opensaml.saml.saml2.binding.decoding.impl.HttpClientResponseSOAP11Decoder" />
+        </constructor-arg>
+    </bean>
+    
+    
+    <!-- SAML-specific SOAP client beans. -->
+    
+    <!-- Basic SAML 2 pipeline. -->
+    <bean id="SOAPClient.SAML2.Pipeline" scope="prototype" parent="SOAPClient.SAML2.Pipeline.Abstract">
+    
+        <property name="outboundPayloadHandler">
+            <bean scope="prototype" class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain">
+                <property name="handlers">
+                    <util:list>
+                    
+                        <ref bean="SOAPClient.MessageChannelSecurity" />
+                        
+                        <ref bean="SOAPClient.InitializeRelyingPartyContexFromSAMLPeer" />
+                        
+                        <ref bean="SOAPClient.SelectRelyingPartyConfiguration" />
+                        
+                        <ref bean="SOAPClient.SelectProfileConfiguration" />
+                    
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.impl.PopulateSignatureSigningParametersHandler" 
+                            p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver"
+                            p:configurationLookupStrategy-ref="shibboleth.MessageContext.SignatureSigningConfigurationLookup"
+                            p:activationCondition-ref="SOAPClient.SAMLSigningPredicate"
+                            />
+                            
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler" />
+                        
+                    </util:list>
+                </property>
+            </bean>
+        </property>
+        
+        <property name="outboundTransportHandler">
+            <bean scope="prototype" class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain">
+                <property name="handlers">
+                    <util:list>
+                        <bean scope="prototype" class="org.opensaml.security.messaging.impl.PopulateHttpClientSecurityParametersHandler" 
+                            p:httpClientSecurityParametersResolver-ref="shibboleth.HttpClientSecurityParametersResolver"
+                            p:configurationLookupStrategy-ref="shibboleth.MessageContext.HttpClientSecurityConfigurationLookup"
+                            p:clientTLSPredicate-ref="SOAPClient.ClientTLSPredicate"
+                            />
+                    </util:list>
+                </property>
+            </bean>
+        </property>
+        
+        <property name="inboundHandler">
+            <bean scope="prototype" class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain">
+                <property name="handlers">
+                    <util:list>
+                    
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.security.impl.CheckAndRecordServerTLSEntityAuthenticationtHandler" 
+                            p:entityIDLookup-ref="SOAPClient.OperationContextEntityIDLookup" />
+
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.impl.SAMLProtocolAndRoleHandler" 
+                            p:copyContextLookup-ref="SOAPClient.OperationContextLookup">
+                        </bean>
+                        
+                        <bean scope="prototype" class="org.opensaml.xmlsec.messaging.impl.PopulateSignatureValidationParametersHandler"
+                            p:signatureValidationParametersResolver-ref="shibboleth.SignatureValidationParametersResolver"
+                            p:configurationLookupStrategy-ref="shibboleth.MessageContext.SignatureValidationConfigurationLookup" />
+                        
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.security.impl.InResponseToSecurityHandler" />
+                        
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.security.impl.MessageReplaySecurityHandler"
+                            p:replayCache-ref="shibboleth.ReplayCache"
+                            p:expires="%{idp.policy.messageLifetime:PT3M}" />
+                        
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.security.impl.MessageLifetimeSecurityHandler"
+                            p:messageLifetime="%{idp.policy.messageLifetime:PT3M}"
+                            p:clockSkew="%{idp.policy.clockSkew:PT3M}" />
+                        
+                        <bean scope="prototype" class="org.opensaml.saml.common.binding.security.impl.SAMLProtocolMessageXMLSignatureSecurityHandler" />
+                        
+                        <bean scope="prototype" class="org.opensaml.messaging.handler.impl.CheckMandatoryIssuer"
+                            p:issuerLookupStrategy-ref="SOAPClient.SAMLMessageContextIssuerFunction" />
+                        
+                        <bean scope="prototype" class="org.opensaml.messaging.handler.impl.CheckExpectedIssuer"
+                            p:issuerLookupStrategy-ref="SOAPClient.SAMLMessageContextIssuerFunction" 
+                            p:expectedIssuerLookupStrategy-ref="SOAPClient.OperationContextEntityIDLookup" />
+                        
+                        <bean scope="prototype" class="org.opensaml.messaging.handler.impl.CheckMandatoryAuthentication">
+                            <property name="authenticationLookupStrategy">
+                                <bean class="org.opensaml.saml.common.messaging.context.navigate.SAMLMessageContextAuthenticationFunction" />
+                            </property>
+                        </bean>
+                        
+                    </util:list>
+                </property>
+            </bean>
+        </property>
+    </bean>
+    
+    
+    
+    
+    <!--  Supporting beans. -->
+    
+    <bean id="SOAPClient.OperationContextLookup" 
+        class="org.opensaml.messaging.context.navigate.RecursiveTypedParentContextLookup" 
+        c:targetClass="#{T(org.opensaml.messaging.context.InOutOperationContext)}" />
+    
+    <bean id="SOAPClient.OperationContextEntityIDLookup"
+        class="org.opensaml.saml.common.binding.security.impl.OperationContextEntityIDLookup" />
+    
+    <bean id="SOAPClient.SAMLMessageContextIssuerFunction"
+        class="org.opensaml.saml.common.messaging.context.navigate.SAMLMessageContextIssuerFunction" />
+    
+    <bean id="SOAPClient.DestinationURILookup" 
+        class="org.opensaml.soap.client.messaging.SOAPClientDestinationURILookup" />
+        
+    <bean id="SOAPClient.SOAPClientSecurityProfileIdLookup" 
+        class="org.opensaml.soap.client.security.SOAPClientSecurityProfileIdLookupFunction" />
+    
+    <bean id="SOAPClient.InitializeRelyingPartyContexFromSAMLPeer"
+        class="net.shibboleth.idp.saml.messaging.impl.InitializeRelyingPartyContextFromSAMLPeer" scope="prototype" />
+        
+    <bean id="SOAPClient.SelectRelyingPartyConfiguration"
+        class="net.shibboleth.idp.profile.messaging.impl.SelectRelyingPartyConfiguration" scope="prototype"
+        p:relyingPartyConfigurationResolver-ref="shibboleth.CriteriaRelyingPartyConfigurationResolver" />
+        
+    <bean id="SOAPClient.SelectProfileConfiguration"
+        class="net.shibboleth.idp.profile.messaging.impl.SelectProfileConfiguration" scope="prototype"
+        p:profiledIdLookupStrategy-ref="SOAPClient.SOAPClientSecurityProfileIdLookup" />
+        
+    <bean id="SOAPClient.MessageChannelSecurity"
+        class="org.opensaml.messaging.handler.impl.URLEvaluatingMessageChannelSecurity" scope="prototype"
+        p:URLLookup-ref="SOAPClient.DestinationURILookup" />
+        
+    <bean id="SOAPClient.HttpClient" parent="shibboleth.NonCachingHttpClient"
+        p:tLSSocketFactory-ref="shibboleth.SecurityEnhancedTLSSocketFactoryWithClientTLS" />
+        
+    <bean id="SOAPClient.ClientTLSPredicate"
+        class="org.opensaml.soap.client.messaging.SOAPClientPipelineNameMappingPredicate">
+        <constructor-arg>
+            <map>
+                <entry key="SAML2.ArtifactDecoder">
+                    <bean class="net.shibboleth.idp.saml.profile.config.logic.messaging.ClientTLSArtifactRequestsPredicate" />
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="SOAPClient.SAMLSigningPredicate"
+        class="org.opensaml.soap.client.messaging.SOAPClientPipelineNameMappingPredicate">
+        <constructor-arg>
+            <map>
+                <entry key="SAML2.ArtifactDecoder">
+                    <bean class="net.shibboleth.idp.saml.profile.config.logic.messaging.SignArtifactRequestsPredicate" />
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+    
+
+</beans>

@@ -1,0 +1,14 @@
+export APPLICATION=internal-idp
+export APIGEE_PREFIX=apigee-
+DESCRIPTION=" Application: Apigee Internal IDP"
+ITERATION="0.0.0"
+LICENSE="Apache V2 License"
+MAINTAINER="Rajesh Mishra<rajeshmi@google.com>"
+NAME="apigee-internal-idp"
+RPM_GROUP="apigee"
+RPM_USER="apigee"
+URL="http://www.apigee.com/docs"
+VENDOR="None."
+VERSION="1.0.0"
+RUN_USER=${RUN_USER:-${RPM_USER}}
+RUN_GROUP=${RPM_GROUP}

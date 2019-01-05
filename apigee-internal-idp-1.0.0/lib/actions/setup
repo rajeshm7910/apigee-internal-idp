@@ -1,0 +1,77 @@
+#!/bin/bash
+# SYNOPSIS: setup [-f CONFIG]
+#
+# FLAGS: -f CONFIG (optional) apply settings from given CONFIG file
+#
+# ARGUMENTS: none
+#
+
+echo "Setting up apigee-internal-idp"
+if [ "$microkernel_installType" == "asg" ]; then
+echo "Skipping apigee-internal-idp setup for ASG deployment as it's handled thru CWC"
+exit 0
+fi
+
+source "${APIGEE_ROOT}/apigee-lib/apigee-lib.sh" || exit 1
+source "${APIGEE_ROOT}/etc/defaults.sh" || exit 1
+source "${APIGEE_ROOT}/apigee-lib/dofflag.sh" || exit 1
+validate_vars "${APIGEE_PREFIX}${APPLICATION}" "setup" || exit 1
+APIGEE_SERVICE="${APIGEE_ROOT}/apigee-service/bin/apigee-service"
+TOKEN_DIR="${APIGEE_ROOT}/token/application"
+TOKEN_FILE="${TOKEN_DIR}/${APPLICATION}.properties"
+mkdir -p ${TOKEN_DIR} && touch "${TOKEN_FILE}" || exit 1
+validate_vars "${APIGEE_PREFIX}${APPLICATION}" "setup" || exit 1
+SHIBBOLETH_VERSION=3.4.0
+
+
+#####################################
+# Step 1 : Configure Shibboleth idp #
+#####################################
+
+
+setup_shibboleth() {
+
+tmpidp_properties=$(mktemp)
+echo "idp.sealer.keyPassword=${IDP_SEALER_KEYPASSWORD}" >> ${tmpidp_properties}
+echo "idp.sealer.storePassword=${IDP_SEALER_STOREPASSWORD}" >> ${tmpidp_properties}
+echo "idp.entityID=${IDP_SCHEME}://${IDP_HOSTNAME}:${IDP_PORT}/idp/shibboleth" >> ${tmpidp_properties}
+echo "idp.scope=${IDP_HOSTNAME}" >> ${tmpidp_properties}
+
+sleep 10
+
+#Update Tokens now
+update_property "${TOKEN_FILE}" "conf_logback_component_logger_logdir=${APIGEE_ROOT}/${COMPONENT_NAME}/logger"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_ssl_enabled=false"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_secure=false"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_scheme=http"
+update_property "${TOKEN_FILE}" "conf_edge_ue_url=$EDGE_UE_URL"
+update_property "${TOKEN_FILE}" "conf_idp_home=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.bind.type=bindSearchAuthenticator"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.server.host=$LDAP_HOSTNAME"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.server.port=$LDAP_PORT"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.user.store.baseDN=dc=apigee,dc=com"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.user.store.user.attribute=mail"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.user.store.search.query=(mail=\$resolutionContext.principal)"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.user.store.return.attributes=mail sn cn"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.indirect.bind.server.admin.dn=uid=admin,ou=users,ou=global,dc=apigee,dc=com"
+update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.indirect.bind.server.admin.password=$APIGEE_PASSWORD"
+update_property "${TOKEN_FILE}" "conf_idp_home=$APIGEE_ROOT/${APIGEE_PREFIX}${APPLICATION}/shibboleth-idp"
+
+${APIGEE_ROOT}/apigee-shibboleth-identity-provider/bin/install.sh -Didp.src.dir=${APIGEE_ROOT}/apigee-shibboleth-identity-provider -Didp.target.dir=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp -Didp.host.name=${IDP_HOSTNAME}:${IDP_PORT} -Didp.keystore.password=${IDP_KEYSTORE_PASSWORD} -Didp.sealer.password=${IDP_SEALER_PASSWORD} -Didp.merge.properties=${tmpidp_properties} -Didp.noprompt=true
+
+
+CHECKED_CALL "${APIGEE_SERVICE}" "${COMPONENT_NAME}" configure
+chown -R ${RUN_USER}:${RUN_GROUP} ${APIGEE_ROOT}/${COMPONENT_NAME}/shibboleth-idp
+
+echo "Rebuilding war file after configuration changes"
+${APIGEE_ROOT}/${COMPONENT_NAME}/shibboleth-idp/bin/build.sh -Didp.target.dir=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp -Didp.noprompt=true
+
+rm -fr ${tmpidp_properties}
+
+SERVICE_BOOTSTRAP_TIME=$(date +%s)
+echo "Restarting ${COMPONENT_NAME} service"
+CHECKED_CALL "${APIGEE_SERVICE}" "${COMPONENT_NAME}" restart
+
+}
+
+setup_shibboleth

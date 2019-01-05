@@ -1,0 +1,6 @@
+04-Jan-2019 01:00:13.764 INFO [localhost-startStop-1] org.apache.catalina.core.ApplicationContext.log No Spring WebApplicationInitializer types detected on classpath
+04-Jan-2019 01:00:13.929 INFO [localhost-startStop-1] org.apache.catalina.core.ApplicationContext.log Initializing Spring root WebApplicationContext
+04-Jan-2019 01:00:23.180 SEVERE [localhost-startStop-1] org.apache.tomcat.util.descriptor.web.SecurityConstraint.findUncoveredHttpMethods For security constraints with URL pattern [/*] only the HTTP methods [TRACE DELETE OPTIONS PUT PATCH] are covered. All other methods are uncovered.
+04-Jan-2019 01:00:23.249 INFO [localhost-startStop-1] org.apache.catalina.core.ApplicationContext.log Initializing Spring FrameworkServlet 'idp'
+04-Jan-2019 02:07:09.064 INFO [localhost-startStop-2] org.apache.catalina.core.ApplicationContext.log Destroying Spring FrameworkServlet 'idp'
+04-Jan-2019 02:07:09.097 INFO [localhost-startStop-2] org.apache.catalina.core.ApplicationContext.log Closing Spring root WebApplicationContext

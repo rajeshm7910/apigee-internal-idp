@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+                           
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+       
+    <!--
+    This is ALOT of wiring to pre-configure support for virtually system-wide support for deriving relying-party
+    settings and profile settings through examination of metadata tags.
+    -->
+
+    <!-- Parent beans for defining metadata-driven config lookup strategies. -->
+
+    <bean id="RelyingParty.MDDriven" abstract="true" parent="RelyingParty">
+        <property name="responderIdLookupStrategy">
+            <bean parent="shibboleth.MDDrivenStringProperty" p:propertyName="responderId" />
+        </property>
+        <property name="profileConfigurationsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenBeanProperty" p:propertyName="profileConfigurations"
+                p:propertyType="#{T(java.util.Map)}" />
+        </property>
+        <property name="detailedErrorsPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="detailedErrors" />
+                </constructor-arg>
+                <constructor-arg value="%{idp.errors.detailed:false}" />
+            </bean>
+        </property>
+    </bean>
+    
+    <!-- Parent beans for metadata-driven RelyingParty helpers. -->
+
+    <bean id="RelyingPartyByName.MDDriven" parent="RelyingParty.MDDriven" abstract="true"
+        class="net.shibboleth.idp.saml.relyingparty.impl.RelyingPartyConfigurationSupport" factory-method="byName" />
+
+    <bean id="RelyingPartyByGroup.MDDriven" parent="RelyingParty.MDDriven" abstract="true"
+        class="net.shibboleth.idp.saml.relyingparty.impl.RelyingPartyConfigurationSupport" factory-method="byGroup"
+        c:resolver-ref="shibboleth.MetadataResolver" />
+
+    <bean id="RelyingPartyByTag.MDDriven" parent="RelyingParty.MDDriven" abstract="true"
+        class="net.shibboleth.idp.saml.relyingparty.impl.RelyingPartyConfigurationSupport" factory-method="byTag"
+        c:trim="false" c:matchAll="false" />
+    
+    <bean id="shibboleth.DefaultMDProfileAliases"
+            class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <value>http://shibboleth.net/ns/profiles</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="shibboleth.AbstractMDDrivenProperty" abstract="true"
+        p:profileAliases="#{getObject('shibboleth.MDProfileAliases') ?: getObject('shibboleth.DefaultMDProfileAliases')}" />
+    
+    <bean id="shibboleth.MDDrivenStringProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.StringConfigurationLookupStrategy" />
+    <bean id="shibboleth.MDDrivenBoolProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.BooleanConfigurationLookupStrategy" />
+    <bean id="shibboleth.MDDrivenIntProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.IntegerConfigurationLookupStrategy" />
+    <bean id="shibboleth.MDDrivenLongProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.LongConfigurationLookupStrategy" />
+    <bean id="shibboleth.MDDrivenDoubleProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.DoubleConfigurationLookupStrategy" />
+    <bean id="shibboleth.MDDrivenDurationProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.DurationConfigurationLookupStrategy" />
+    <bean id="shibboleth.MDDrivenListProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.ListConfigurationLookupStrategy"
+        p:propertyType="#{T(java.lang.String)}" />
+    <bean id="shibboleth.MDDrivenSetProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.SetConfigurationLookupStrategy"
+        p:propertyType="#{T(java.lang.String)}" />
+    <bean id="shibboleth.MDDrivenBeanProperty" abstract="true" parent="shibboleth.AbstractMDDrivenProperty"
+        class="net.shibboleth.idp.saml.profile.config.BeanConfigurationLookupStrategy" />
+
+    <!-- Wiring lookup strategies into the actual profile configurations of various types. -->
+
+    <bean id="AbstractMDDrivenProfile" parent="AbstractProfileConfig" abstract="true">
+        <property name="securityConfigurationLookupStrategy">
+            <bean parent="shibboleth.MDDrivenBeanProperty" p:propertyName="securityConfiguration"
+                p:propertyType="#{T(net.shibboleth.idp.profile.config.SecurityConfiguration)}" />
+        </property>
+        <property name="disallowedFeaturesLookupStrategy">
+            <bean parent="shibboleth.MDDrivenIntProperty" p:propertyName="disallowedFeatures" />
+        </property>
+    </bean>
+    
+    <bean id="AbstractMDDrivenSAMLProfile" parent="AbstractMDDrivenProfile" abstract="true">
+        <property name="signRequests">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signRequests" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="signAssertions">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signAssertions" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="includeConditionsNotBeforePredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="includeConditionsNotBefore" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="assertionLifetimeLookupStrategy">
+            <bean parent="shibboleth.MDDrivenDurationProperty" p:propertyName="assertionLifetime" />
+        </property>
+        <property name="assertionAudiencesLookupStrategy">
+            <bean parent="shibboleth.MDDrivenSetProperty" p:propertyName="assertionAudiences" />
+        </property>
+    </bean>
+    
+    <bean id="AbstractMDDrivenSAML2Profile" parent="AbstractMDDrivenSAMLProfile" abstract="true">
+        <property name="encryptionOptionalPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptionOptional" />
+                </constructor-arg>
+                <constructor-arg value="%{idp.encryption.optional:false}" />
+            </bean>
+        </property>
+        <property name="encryptAssertions">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptAssertions" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="encryptNameIDs">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptNameIDs" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="encryptAttributes">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptAttributes" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="proxyCountLookupStrategy">
+            <bean parent="shibboleth.MDDrivenLongProperty" p:propertyName="proxyCount" />
+        </property>
+        <property name="proxyAudiencesLookupStrategy">
+            <bean parent="shibboleth.MDDrivenSetProperty" p:propertyName="proxyAudiences" />
+        </property>
+    </bean>
+
+    <bean id="AbstractMDDrivenCASProfile" parent="AbstractMDDrivenProfile" abstract="true">
+        <property name="resolveAttributesPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="resolveAttributes" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="ticketValidityPeriodLookupStrategy">
+            <bean parent="shibboleth.MDDrivenDurationProperty" p:propertyName="ticketValidityPeriod" />
+        </property>
+    </bean>
+
+    <!-- Concrete profile beans. -->
+
+    <bean id="Shibboleth.SSO.MDDriven" parent="AbstractMDDrivenSAMLProfile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml1.profile.config.BrowserSSOProfileConfiguration"
+            p:artifactConfiguration-ref="shibboleth.DefaultArtifactConfiguration"
+            p:inboundInterceptorFlows="security-policy/shibboleth-sso">
+        <property name="artifactConfigurationLookupStrategy">
+            <bean parent="shibboleth.MDDrivenBeanProperty" p:propertyName="artifactConfiguration"
+                p:propertyType="#{T(net.shibboleth.idp.saml.profile.config.SAMLArtifactConfiguration)}" />
+        </property>
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="resolveAttributesPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="resolveAttributes" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="includeAttributeStatementPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="includeAttributeStatement" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="forceAuthnPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="forceAuthn" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="defaultAuthenticationMethodsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="defaultAuthenticationMethods"
+                p:propertyType="#{T(net.shibboleth.idp.saml.authn.principal.AuthenticationMethodPrincipal)}" />
+        </property>
+        <property name="postAuthenticationFlowsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="postAuthenticationFlows" />
+        </property>
+        <property name="nameIDFormatPrecedenceLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="nameIDFormatPrecedence" />
+        </property>
+    </bean>
+    
+    <bean id="SAML1.AttributeQuery.MDDriven" parent="AbstractMDDrivenSAMLProfile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml1.profile.config.AttributeQueryProfileConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml-soap">
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="SAML1.ArtifactResolution.MDDriven" parent="AbstractMDDrivenSAMLProfile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml1.profile.config.ArtifactResolutionProfileConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml-soap">
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="SAML2.SSO.MDDriven" parent="AbstractMDDrivenSAML2Profile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml2.profile.config.BrowserSSOProfileConfiguration"
+            p:artifactConfiguration-ref="shibboleth.DefaultArtifactConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml2-sso">
+        <property name="artifactConfigurationLookupStrategy">
+            <bean parent="shibboleth.MDDrivenBeanProperty" p:propertyName="artifactConfiguration"
+                p:propertyType="#{T(net.shibboleth.idp.saml.profile.config.SAMLArtifactConfiguration)}" />
+        </property>
+        <property name="signArtifactRequests">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signArtifactRequests" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.messaging.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="clientTLSArtifactRequests">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="clientTLSArtifactRequests" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean parent="shibboleth.Conditions.NOT">
+                        <constructor-arg>
+                            <bean class="org.opensaml.messaging.logic.NoIntegrityMessageChannelPredicate" />
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="encryptAssertions">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptAssertions" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="resolveAttributesPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="resolveAttributes" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="includeAttributeStatementPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="includeAttributeStatement" />
+                </constructor-arg>
+                <constructor-arg value="true" />
+            </bean>
+        </property>
+        <property name="forceAuthnPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="forceAuthn" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="skipEndpointValidationWhenSignedPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="skipEndpointValidationWhenSigned" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="defaultAuthenticationMethodsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="defaultAuthenticationMethods"
+                p:propertyType="#{T(net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal)}" />
+        </property>
+        <property name="postAuthenticationFlowsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="postAuthenticationFlows" />
+        </property>
+        <property name="nameIDFormatPrecedenceLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="nameIDFormatPrecedence" />
+        </property>
+        <property name="maximumSPSessionLifetimeLookupStrategy">
+            <bean parent="shibboleth.MDDrivenDurationProperty" p:propertyName="maximumSPSessionLifetime" />
+        </property>
+        <property name="allowDelegation">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="allowDelegation" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+        <property name="maximumTokenDelegationChainLengthLookupStrategy">
+            <bean parent="shibboleth.MDDrivenLongProperty" p:propertyName="maximumTokenDelegationChainLength" />
+        </property>
+    </bean>
+
+    <bean id="SAML2.ECP.MDDriven" parent="SAML2.SSO.MDDriven" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml2.profile.config.ECPProfileConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml2-ecp">
+        <property name="localEventsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenSetProperty" p:propertyName="localEvents" />
+        </property>
+    </bean>
+
+    <bean id="SAML2.Logout.MDDriven" parent="AbstractMDDrivenSAML2Profile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml2.profile.config.SingleLogoutProfileConfiguration"
+            p:artifactConfiguration-ref="shibboleth.DefaultArtifactConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml2-slo">
+        <property name="artifactConfigurationLookupStrategy">
+            <bean parent="shibboleth.MDDrivenBeanProperty" p:propertyName="artifactConfiguration"
+                p:propertyType="#{T(net.shibboleth.idp.saml.profile.config.SAMLArtifactConfiguration)}" />
+        </property>
+        <property name="signArtifactRequests">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signArtifactRequests" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.messaging.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="clientTLSArtifactRequests">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="clientTLSArtifactRequests" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean parent="shibboleth.Conditions.NOT">
+                        <constructor-arg>
+                            <bean class="org.opensaml.messaging.logic.NoIntegrityMessageChannelPredicate" />
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="signRequests">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signRequests" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="encryptNameIDs">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptNameIDs" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoConfidentialityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="qualifiedNameIDFormatsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="qualifiedNameIDFormats" />
+        </property>
+    </bean>
+
+    <bean id="SAML2.AttributeQuery.MDDriven" parent="AbstractMDDrivenSAML2Profile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml2.profile.config.AttributeQueryProfileConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml-soap">
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="encryptAssertions">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptAssertions" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoConfidentialityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="SAML2.ArtifactResolution.MDDriven" parent="AbstractMDDrivenSAML2Profile" lazy-init="true"
+            class="net.shibboleth.idp.saml.saml2.profile.config.ArtifactResolutionProfileConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml-soap">
+        <property name="signResponses">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="signResponses" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoIntegrityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="encryptAssertions">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="encryptAssertions" />
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="org.opensaml.profile.logic.NoConfidentialityMessageChannelPredicate" />
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="Liberty.SSOS.MDDriven" parent="SAML2.SSO.MDDriven" lazy-init="true"
+            class="net.shibboleth.idp.saml.idwsf.profile.config.SSOSProfileConfiguration"
+            p:inboundInterceptorFlows="security-policy/saml2-idwsf-ssos">
+        <property name="delegationPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="delegation" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="CAS.LoginConfiguration.MDDriven" parent="AbstractMDDrivenCASProfile" lazy-init="true"
+            class="net.shibboleth.idp.cas.config.impl.LoginConfiguration">
+        <property name="defaultAuthenticationMethodsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="defaultAuthenticationMethods"
+                p:propertyType="#{T(net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal)}" />
+        </property>
+        <property name="postAuthenticationFlowsLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="postAuthenticationFlows" />
+        </property>
+        <property name="nameIDFormatPrecedenceLookupStrategy">
+            <bean parent="shibboleth.MDDrivenListProperty" p:propertyName="nameIDFormatPrecedence" />
+        </property>
+        <property name="forceAuthnPredicate">
+            <bean class="net.shibboleth.utilities.java.support.logic.PredicateSupport" factory-method="fromFunction">
+                <constructor-arg>
+                    <bean parent="shibboleth.MDDrivenBoolProperty" p:propertyName="forceAuthn" />
+                </constructor-arg>
+                <constructor-arg value="false" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="CAS.ProxyConfiguration.MDDriven" parent="AbstractMDDrivenCASProfile" lazy-init="true"
+        class="net.shibboleth.idp.cas.config.impl.ProxyConfiguration" />
+
+    <bean id="CAS.ValidateConfiguration.MDDriven" parent="AbstractMDDrivenCASProfile" lazy-init="true"
+            class="net.shibboleth.idp.cas.config.impl.ValidateConfiguration">
+        <property name="serviceComparatorLookupStrategy">
+            <bean parent="shibboleth.MDDrivenBeanProperty" p:propertyName="serviceComparator"
+                p:propertyType="#{T(java.util.Comparator)}" />
+        </property>
+        <property name="userAttributeLookupStrategy">
+            <bean parent="shibboleth.MDDrivenStringProperty" p:propertyName="userAttribute" />
+        </property>
+    </bean>
+
+</beans>

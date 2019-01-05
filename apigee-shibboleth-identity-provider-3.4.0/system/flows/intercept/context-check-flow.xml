@@ -1,0 +1,31 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+      parent="intercept.abstract">
+
+    <!-- Rudimentary impediment to direct execution of subflow. -->
+    <input name="calledAsSubflow" type="boolean" required="true" />
+
+    <on-start>
+        <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.context-check.Function') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.context-check.Function') : null" result="flowScope.ContextCheckFunction" />
+    </on-start>
+    
+    <decision-state id="CheckForFunction">
+        <if test="ContextCheckFunction != null"
+            then="CallFunction" else="CheckCondition" />
+    </decision-state>
+
+    <action-state id="CallFunction">
+        <evaluate expression="ContextCheckFunction.apply(opensamlProfileRequestContext)" />
+        
+        <transition on="proceed" to="proceed" />
+    </action-state>
+    
+    <decision-state id="CheckCondition">
+        <if test="flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.context-check.Condition').apply(opensamlProfileRequestContext)"
+            then="proceed" else="ContextCheckDenied" />
+    </decision-state>
+    
+    <bean-import resource="context-check-beans.xml" />
+
+</flow>

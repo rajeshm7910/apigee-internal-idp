@@ -1,0 +1,84 @@
+ <flow xmlns="http://www.springframework.org/schema/webflow"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+       parent="intercept.abstract">
+
+    <!-- Rudimentary impediment to direct execution of subflow. -->
+    <input name="calledAsSubflow" type="boolean" required="true" />
+    
+    <on-start>
+        <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.SubjectContext))" result="flowScope.subjectContext" />
+    </on-start>
+
+    <action-state id="CheckGeneralAccess">
+        <evaluate expression="CheckGeneralAccess" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="ImpersonateView" />
+        <transition to="proceed" />
+    </action-state>
+
+    <view-state id="ImpersonateView" view="#{flowRequestContext.activeFlow.id}">
+        <on-render>
+            <evaluate expression="environment" result="viewScope.environment" />
+            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="viewScope.encoder" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+            <evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext)).getSubcontext(T(net.shibboleth.idp.ui.context.RelyingPartyUIContext))" result="viewScope.rpUIContext" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="viewScope.custom" />
+        </on-render>
+        
+        <transition on="impersonate" to="CheckForImpersonation" />
+        <transition to="proceed" />
+    </view-state>
+    
+    <decision-state id="CheckForImpersonation">
+        <on-entry>
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest().getParameter('principal')" result="requestScope.principalToSpoof" />
+        </on-entry>
+        <if test="principalToSpoof == null or principalToSpoof.length() == 0"
+            then="proceed" else="CheckSpecificAccess" />
+    </decision-state>
+    
+    <action-state id="CheckSpecificAccess">
+        <evaluate expression="CheckSpecificAccess" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="DoImpersonate" />
+        <transition to="ImpersonationViolation" />
+    </action-state>
+    
+    <action-state id="DoImpersonate">
+        <on-entry>
+            <!-- Clear existing attribute state. -->
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.RelyingPartyContext)).removeSubcontext(T(net.shibboleth.idp.attribute.context.AttributeContext))" />
+            <!-- Log the impersonation. -->
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.RelyingPartyContext)).getRelyingPartyId()" result="requestScope.relyingPartyId" />
+            <evaluate expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.profile.interceptor').info('Impersonation by principal ''{}'' as ''{}'' to relying party ''{}''', new Object[]{subjectContext.getPrincipalName(), principalToSpoof, relyingPartyId})" />
+            <!-- Swap identities. -->
+            <evaluate expression="subjectContext.setImpersonatingPrincipalName(subjectContext.getPrincipalName())" />
+            <evaluate expression="subjectContext.setPrincipalName(principalToSpoof)" />
+        </on-entry>
+        
+        <evaluate expression="PopulateAuditContext" />
+        <evaluate expression="ResolveAttributes" />
+        <evaluate expression="FilterAttributes" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="proceed" />
+    </action-state>
+
+    <end-state id="ImpersonationViolation">
+        <on-entry>
+            <!-- Log violation. -->
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.RelyingPartyContext)).getRelyingPartyId()" result="requestScope.relyingPartyId" />
+            <evaluate expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.profile.interceptor').warn('Unauthorized impersonation attempt by principal ''{}'' as ''{}'' to relying party ''{}''', new Object[]{subjectContext.getPrincipalName(), principalToSpoof, relyingPartyId})" />
+        </on-entry>
+    </end-state>
+
+    <end-state id="proceed" />
+
+    <bean-import resource="impersonate-beans.xml" />
+
+</flow>
