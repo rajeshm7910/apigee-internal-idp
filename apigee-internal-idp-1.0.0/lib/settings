@@ -2,7 +2,7 @@ export CATALINA_HOME=${APIGEE_ROOT}/apigee-tomcat-idp
 export CATALINA_BASE=${APIGEE_ROOT}/${COMPONENT_NAME}
 export CATALINA_OUT=${APIGEE_APP_LOGDIR}
 export CLASSPATH=${CLASSPATH}:${CATALINA_BASE}/conf
-export JAVA_OPTS="${JAVA_OPTS} -Dlogback.config.file=${CATALINA_BASE}/conf/logback.xml  -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xmx2048m -XX:PermSize=32m  -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+export JAVA_OPTS="${JAVA_OPTS} -Dlogback.config.file=${CATALINA_BASE}/conf/logback.xml  -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xmx2048m -XX:PermSize=32m  -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=2099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 
 APPLICATION_EXE=${CATALINA_HOME}/bin/catalina.sh
 EXTRA_ARGS="run"

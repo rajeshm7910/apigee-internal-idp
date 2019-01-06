@@ -34,16 +34,25 @@ setup_shibboleth() {
 tmpidp_properties=$(mktemp)
 echo "idp.sealer.keyPassword=${IDP_SEALER_KEYPASSWORD}" >> ${tmpidp_properties}
 echo "idp.sealer.storePassword=${IDP_SEALER_STOREPASSWORD}" >> ${tmpidp_properties}
-echo "idp.entityID=${IDP_SCHEME}://${IDP_HOSTNAME}:${IDP_PORT}/idp/shibboleth" >> ${tmpidp_properties}
+echo "idp.entityID=${IDP_TOMCAT_SCHEME}://${IDP_HOSTNAME}:${IDP_TOMCAT_PORT}/idp/shibboleth" >> ${tmpidp_properties}
 echo "idp.scope=${IDP_HOSTNAME}" >> ${tmpidp_properties}
 
 sleep 10
 
 #Update Tokens now
 update_property "${TOKEN_FILE}" "conf_logback_component_logger_logdir=${APIGEE_ROOT}/${COMPONENT_NAME}/logger"
-update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_ssl_enabled=false"
-update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_secure=false"
-update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_scheme=http"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_listen_port=${IDP_TOMCAT_PORT}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_ssl_enabled=${IDP_TOMCAT_ENABLE_SSL}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_secure=${IDP_TOMCAT_ENABLE_SSL}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_scheme=${IDP_TOMCAT_SCHEME}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_keystore_type=JKS"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_keystore_file=${IDP_TOMCAT_KEYSTORE_FILEPATH}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_keystore_password=${IDP_TOMCAT_KEYSTORE_PASSWORD}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_keyalias=${IDP_TOMCAT_KEYSTORE_ALIAS}"
+update_property "${TOKEN_FILE}" "conf_server_idp_tomcat_clientauth_enabled=false"
+update_property "${TOKEN_FILE}" "conf_idp_server_tomcat_ssl_protocols=TLSv1,TLSv1.1,TLSv1.2"
+
+
 update_property "${TOKEN_FILE}" "conf_edge_ue_url=$EDGE_UE_URL"
 update_property "${TOKEN_FILE}" "conf_idp_home=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp"
 update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.bind.type=bindSearchAuthenticator"
@@ -57,7 +66,7 @@ update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.indirect.bind.serv
 update_property "${TOKEN_FILE}" "conf_idp_ldap.authentication.indirect.bind.server.admin.password=$APIGEE_PASSWORD"
 update_property "${TOKEN_FILE}" "conf_idp_home=$APIGEE_ROOT/${APIGEE_PREFIX}${APPLICATION}/shibboleth-idp"
 
-${APIGEE_ROOT}/apigee-shibboleth-identity-provider/bin/install.sh -Didp.src.dir=${APIGEE_ROOT}/apigee-shibboleth-identity-provider -Didp.target.dir=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp -Didp.host.name=${IDP_HOSTNAME}:${IDP_PORT} -Didp.keystore.password=${IDP_KEYSTORE_PASSWORD} -Didp.sealer.password=${IDP_SEALER_PASSWORD} -Didp.merge.properties=${tmpidp_properties} -Didp.noprompt=true
+${APIGEE_ROOT}/apigee-shibboleth-identity-provider/bin/install.sh -Didp.src.dir=${APIGEE_ROOT}/apigee-shibboleth-identity-provider -Didp.target.dir=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp -Didp.host.name=${IDP_HOSTNAME}:${IDP_TOMCAT_PORT} -Didp.keystore.password=${IDP_KEYSTORE_PASSWORD} -Didp.sealer.password=${IDP_SEALER_PASSWORD} -Didp.merge.properties=${tmpidp_properties} -Didp.noprompt=true
 
 
 CHECKED_CALL "${APIGEE_SERVICE}" "${COMPONENT_NAME}" configure

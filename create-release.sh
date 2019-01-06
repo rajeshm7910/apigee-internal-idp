@@ -26,6 +26,9 @@ su -m -c "fpm -s dir -t rpm -a noarch -n apigee-internal-idp --version 1.0.0 --i
 
 rm -fr dist/1.0.0/*
 mv *.rpm dist/1.0.0/
+#targz the edge-management-ui
+su -m -c "tar czf ./dist/1.0.0/edge-management-ui.tar.gz edge-management-ui/" apigee
+su -m -c "cp -fr fix-ue-routes.sh dist/1.0.0/" apigee
 su -m -c "createrepo dist/1.0.0/" apigee
 unlink apigee-shibboleth-identity-provider
 unlink apigee-tomcat-idp

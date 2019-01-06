@@ -1,0 +1,25 @@
+#Public hostname of IDP hostname
+APIGEE_PASSWORD=Secret123
+IDP_HOSTNAME=35.232.151.172
+
+# Specify the apigee-sso port, typically between 1025 and 65535.
+IDP_TOMCAT_PORT=9090
+IDP_PUBLIC_URL_PORT=9090
+IDP_TOMCAT_SCHEME=https
+IDP_TOMCAT_ENABLE_SSL=true
+# Specify the path to the keystore file.
+IDP_TOMCAT_KEYSTORE_FILEPATH=/opt/apigee/customer/application/apigee-internal-idp/cert.jks
+IDP_TOMCAT_KEYSTORE_ALIAS=sso
+# The password specified when you created the keystore.
+IDP_TOMCAT_KEYSTORE_PASSWORD=Secret123
+
+
+IDP_SEALER_PASSWORD=Secret123
+IDP_KEYSTORE_PASSWORD=Secret123
+IDP_SEALER_KEYPASSWORD=Secret123
+IDP_SEALER_STOREPASSWORD=Secret123
+#Points to LDAP Host that gets installed with Apigee. In case of external ldap it should point to external ldap. In case its aio setup its localhost
+LDAP_HOSTNAME=localhost
+LDAP_PORT=10389
+EDGE_UE_URL=http://${IDP_HOSTNAME}:3001
+APIGEE_ADMINPW=Secret123
