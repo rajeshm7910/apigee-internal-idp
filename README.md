@@ -49,7 +49,7 @@ cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
 ```
 sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 ```
-5. In case you want to quickly want to create a self signed jks
+5. In case you want to quickly create a self signed Cert in JKS
 ```
 mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
