@@ -8,7 +8,7 @@ IDP_PUBLIC_URL_PORT=9090
 IDP_TOMCAT_SCHEME=https
 IDP_TOMCAT_ENABLE_SSL=true
 # Specify the path to the keystore file.
-IDP_TOMCAT_KEYSTORE_FILEPATH=/opt/apigee/customer/application/apigee-internal-idp/cert.jks
+IDP_TOMCAT_KEYSTORE_FILEPATH=/opt/apigee/customer/application/apigee-internal-idp/apigee-tomcat/cert.jks
 IDP_TOMCAT_KEYSTORE_ALIAS=idp
 # The password specified when you created the keystore.
 IDP_TOMCAT_KEYSTORE_PASSWORD=Secret123
