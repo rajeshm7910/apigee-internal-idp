@@ -1,0 +1,223 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET           /platform/sreset                                                                   controllers.NonSecure.removeOldSessionCookie()
+# Home page
+GET           /platform                                                                          controllers.Platform.index()
+GET           /platform/                                                                         controllers.Platform.index()
+GET           /platform/components/*path                                                         controllers.ConfigurableAssets.component(path)
+GET           /platform/scripts/*path                                                            controllers.ConfigurableAssets.script(path)
+GET           /platform/styles/*path                                                             controllers.ConfigurableAssets.style(path)
+GET           /platform/branding/*path                                                           controllers.ConfigurableAssets.branding(path)
+GET           /components/*path                                                                  controllers.ConfigurableAssets.component(path)
+GET           /scripts/*path                                                                     controllers.ConfigurableAssets.script(path)
+GET           /styles/*path                                                                      controllers.ConfigurableAssets.style(path)
+GET           /branding/*path                                                                    controllers.ConfigurableAssets.branding(path)
+GET           /platform/*path                                                                    controllers.Platform.indexWithPath(path)
+GET           /under-maintenance                                                                 controllers.Platform.cpsMigration()
+GET           /                                                                                  controllers.Application.index()
+GET           /clearsession                                                                      controllers.NonSecure.clearSession()
+
+## Remap for Mint's jquery-ui-custom.min.css, specifically for .ui-widget-content and related styles for Save Report Definition dialog
+GET           /public/images/jquery-ui/*file                                                     controllers.Assets.at(path="/public/../platform/app/components/jquery-ui/themes/flick/images", file)
+
+# Map static resources from the /public folder to the /assets URL path
+GET           /public/*file                                                                      controllers.Assets.at(path="/public", file)
+GET           /buildInfo                                                                         controllers.BuildInfo.buildInfo()
+GET           /platform/*file                                                                    controllers.ConfigurableAssets.at(file)
+GET           /help                                                                              controllers.ConfigurableAssets.at(file="branding/help/help.pdf")
+GET           /favicon.ico                                                                       controllers.ConfigurableAssets.favicon()
+
+GET           /login                                                                             controllers.NonSecure.login()
+POST          /login                                                                             controllers.NonSecure.authenticate()
+GET           /logout                                                                            controllers.NonSecure.logout()
+
+GET           /mfa                                                                               controllers.Mfa.index()
+POST          /mfa                                                                               controllers.Mfa.authenticate()
+
+GET           /sendPassword                                                                      controllers.NonSecure.sendPassword()
+GET           /resetpassword/:encryptedKey                                                       controllers.NonSecure.resetPassword(encryptedKey: String)
+POST          /forgotpassword                                                                    controllers.NonSecure.forgotPassword()
+POST          /setpassword                                                                       controllers.NonSecure.setPassword()
+GET           /createpassword/:encryptedEmail                                                    controllers.NonSecure.createPassword(encryptedEmail: String)
+POST          /setPasswordNewUser                                                                controllers.NonSecure.setPasswordNewUser()
+POST          /organizations                                                                     controllers.Secure.setOrganization()
+
+GET           /oAuth2ImplicitGrantCallback                                                       controllers.NonSecure.oAuthCallback()
+POST          /oAuth2ImplicitGrantCallbackHandler                                                controllers.NonSecure.oAuthCallbackHandler()
+GET           /oAuthCallbackWithAuthcode                                                         controllers.NonSecure.oAuthCallbackWithAuthcode(code ?=null, state ?= null)
+GET           /oAuthRefreshToken                                                                 controllers.NonSecure.oAuthRenewAccessToken()
+GET           /noorganizations                                                                   controllers.Secure.noOrganizations()
+GET           /credentialsProblem                                                                controllers.NonSecure.credentialsProblem()
+GET           /organizations                                                                     controllers.Secure.selectOrganizations()
+GET           /account/config                                                                    controllers.Account.config()
+
+GET           /ws/proxy/users/:email/userroles                                                   controllers.Browser.getUserRoles(email: String)
+POST          /ws/proxy/users                                                                    controllers.Browser.createUser()
+GET           /ws/proxy/users/:email                                                             controllers.Browser.getOrUpdateUser(email: String)
+GET           /ws/proxy/users/:email/                                                            controllers.Browser.getOrUpdateUser(email: String)
+POST          /ws/proxy/users/:email                                                             controllers.Browser.getOrUpdateUser(email: String)
+POST          /ws/proxy/users/:email/                                                            controllers.Browser.getOrUpdateUser(email: String)
+
+GET           /developerCounts                                                                   controllers.Developers.developerCounts()
+#GET           /appsbyproduct/:product                                                            controllers.Products.AppsByProduct(product: String)
+GET           /audits                                                                            controllers.Audits.audits(startTime: Long ?= 0L, endTime: Long ?= 0L)
+
+## Extensions
+
+GET           /ws/proxy/organizations/:org/apiproducts/:product/apps                             controllers.Products.AppsByProduct(org:String, product: String)
+GET           /ws/proxy/organizations/:org/apis/:api/deployments/status                          controllers.Deployments.status(org:String, api:String)
+GET           /ws/proxy/organizations/:org/environments/:env/keystores                           controllers.Keystores.all(org:String, env:String, expand ?= "false")
+## The following call is replacing a call in the regular proxy controller. If we don't need it, we should remove it as well as the controller code associated to it..
+#GET           /ws/proxy/organizations/:org/environments/:env/virtualhosts                        controllers.Deployments.virtualHosts(org:String, env:String, expand ?= "false")
+GET           /ws/proxy/organizations/:org/apps                                                  controllers.Apps.apps(org: String, ids: String ?= null)
+
+
+
+## Analytics
+
+GET           /ws/:org/Environments/                                                             controllers.Environments.get(org: String)
+
+
+POST          /us/l                                                                              controllers.Secure.userLoggedOut()
+
+GET           /ws/exportAx/*path                                                                 controllers.Browser.exportAX(path)
+
+
+## Proxy
+
+GET           /ws/:account/apis/:api/deployments/:environment                                    controllers.Apis.buildDeployment(account: String, api: String, environment: String)
+POST          /gw/debug/create/:account/:environment/:apiname/:revision/:timeoutInSeconds        controllers.StepBuilderProxy.startDebugSession(account: String, environment: String, apiname: String, revision: String, timeoutInSeconds: String)
+GET           /gw/debug/get/:account/:environment/:apiname/:revision/:sessionId                  controllers.StepBuilderProxy.getDebugData(account: String, environment: String, apiname: String, revision: String, sessionId: String)
+
+POST          /ws/proxy/organizations/:org/userroles/:userrole/allrights                         controllers.Browser.allRightsProxy(org: String, userrole: String, path ?= "")
+POST          /ws/proxy/organizations/:org/userroles/:userrole/initialpermissions                controllers.Browser.initialPermissionsProxy(org: String, userrole: String)
+POST          /ws/proxy/organizations/:org/userroles/:userrole/permissions                       controllers.Browser.updatePermissions(org: String, userrole: String)
+DELETE        /ws/proxy/organizations/:org/userroles/:userrole/permissions                       controllers.Browser.updatePermissions(org: String, userrole: String)
+GET           /ws/proxy/organizations/:org/userroles/:userrole/permissions                       controllers.Browser.getPermissionsAsSuperUser(org: String, userrole: String)
+DELETE        /ws/proxy/organizations/:org/userroles/:userrole/permissions/:operation            controllers.Browser.permissionsOperationProxy(org: String, userrole: String, operation: String)
+GET           /ws/proxy/organizations/:org/userroles/:userrole/users                             controllers.Browser.usersForRoleAsSysAdmin(org: String, userrole: String, expand ?= null)
+GET           /ws/proxy/userSettings/:email                                                      controllers.Browser.userSettingsProxy(email: String)
+POST          /ws/proxy/usersNonSSO/:email                                                       controllers.Browser.usersNonSSOProxy(email: String)
+GET           /ws/proxy/organizations/:org/environments                                          controllers.Environments2.Environments(org: String, includePortalEnvs:Boolean ?= false)
+GET           /ws/proxy/*gwPath                                                                  controllers.Browser.proxy(gwPath: String, addTrailingSlash ?= "false")
+POST          /ws/proxy/*gwPath                                                                  controllers.Browser.proxy(gwPath: String, addTrailingSlash ?= "false")
+PUT           /ws/proxy/*gwPath                                                                  controllers.Browser.proxy(gwPath: String, addTrailingSlash ?= "false")
+DELETE        /ws/proxy/*gwPath                                                                  controllers.Browser.proxy(gwPath: String, addTrailingSlash ?= "false")
+GET           /ws/proxyExpandList/*path                                                          controllers.Browser.expandList(path: String)
+GET           /ws/chunked/*gwPath                                                                controllers.Browser.chunked(gwPath: String, addTrailingSlash ?= "false")
+
+
+GET           /ws/:org/gettingStarted/status                                                     controllers.GettingStarted.getStatus(org: String)
+
+
+POST          /gw/upload/:account/:apiname                                                       controllers.StepBuilderProxy.uploadAppBundle(account: String, apiname: String, newProxy ?= "false", team ?= null)
+POST          /gw/sharedflow/upload/:account/:sharedflowName                                     controllers.StepBuilderProxy.uploadSharedFlowBundle(account: String, sharedflowName: String, newSharedFlow ?= "false")
+GET           /gw/download/:org/:apiName/:revision/                                              controllers.StepBuilderProxy.downloadAppBundle(org: String, apiName: String, revision: String)
+GET           /gw/download/sharedflow/:org/:sharedflowName/:revision/                            controllers.StepBuilderProxy.downloadSharedFlowBundle(org: String, sharedflowName: String, revision: String)
+POST          /gw/uploadbase64/:org/:apiName/                                                    controllers.StepBuilderProxy.uploadBase64AppBundle(org: String, apiName: String, newProxy ?= "false", team ?= null)
+POST          /gw/uploadbase64/:org/:apiName                                                     controllers.StepBuilderProxy.uploadBase64AppBundle(org: String, apiName: String, newProxy ?= "false", team ?= null)
+POST          /gw/uploadbase64/:org/:apiName/:revision                                           controllers.StepBuilderProxy.updateBase64AppBundle(org: String, apiName: String, revision: String)
+POST          /gw/sharedflow/uploadbase64/:org/:sharedflowName                                   controllers.StepBuilderProxy.uploadBase64SharedFlowBundle(org: String, sharedflowName: String, newSharedFlow ?= "false")
+POST          /gw/sharedflow/uploadbase64/:org/:sharedflowName/:revision                         controllers.StepBuilderProxy.updateBase64SharedFlowBundle(org: String, sharedflowName: String, revision: String)
+GET           /gw/debug/sendRequest/:org                                                         controllers.StepBuilderProxy.traceSendRequest(org: String, uri: String)
+GET           /ws/:org/wsdl                                                                      controllers.StepBuilderProxy.newApiProxyWsdl(org: String, uri ?= "")
+POST          /ws/:org/wsdl                                                                      controllers.StepBuilderProxy.newApiProxyWsdlFiles(org: String)
+POST          /ws/:org/wsdl2proxy                                                                controllers.StepBuilderProxy.generateProxyFromWsdlUrlAndImportRevision(org: String)
+POST          /ws/:org/wsdlfiles2proxy                                                           controllers.StepBuilderProxy.generateProxyFromWsdlFilesAndImportRevision(org: String)
+GET           /ws/swagger                                                                        controllers.StepBuilderProxy.downloadSwagger(uri ?= "")
+
+GET           /aa/dictionary                                                                     controllers.Advisory.dictionary
+GET           /aa/proxy/*aaPath                                                                  controllers.Advisory.proxy(aaPath: String)
+
+
+GET           /cspr/string/:id                                                                   controllers.ClientSidePayloadReflector.getString(id: String, filename: String)
+POST          /cspr/string/:id                                                                   controllers.ClientSidePayloadReflector.postString(id: String)
+
+############# monetization ############################
+
+GET           /monetization                                                                      controllers.Commerce.index
+
+GET           /exchange/org                                                                      controllers.Apix.getOrg
+PUT           /exchange/org                                                                      controllers.Apix.putProfile(id = null)
+GET           /exchange/family                                                                   controllers.Apix.getFamily
+GET           /exchange/devs                                                                     controllers.Apix.getDevs
+
+## Organization Profile
+POST          /exchange/profile                                                                  controllers.Apix.postProfile
+PUT           /exchange/profile/:id                                                              controllers.Apix.putProfile(id: String)
+DELETE        /exchange/profile/:id                                                              controllers.Apix.deleteProfile(id: String)
+
+POST          /exchange/tnc                                                                      controllers.Apix.postTnc
+PUT           /exchange/tnc/:id                                                                  controllers.Apix.putTnc(id: String)
+DELETE        /exchange/tnc/:id                                                                  controllers.Apix.deleteTnc(id: String)
+
+## Bank Accounts
+GET           /exchange/banks                                                                    controllers.Apix.getBanks
+POST          /exchange/banks                                                                    controllers.Apix.postBank
+PUT           /exchange/banks/:id                                                                controllers.Apix.putBank(id: String)
+DELETE        /exchange/banks/:id                                                                controllers.Apix.deleteBank(id: String)
+
+## Reports
+GET           /exchange/reports                                                                  controllers.Apix.getReports
+POST          /exchange/reports                                                                  controllers.Apix.postReportDefinition
+DELETE        /exchange/reports/:id                                                              controllers.Apix.deleteReportDefinition(id: String)
+GET           /exchange/withtransactions                                                         controllers.Apix.getWithTransactions
+POST          /exchange/report/:kind.csv                                                         controllers.Apix.generateReportCsv(kind: String)
+
+## Billing Documents
+GET           /exchange/billingMonths                                                            controllers.Apix.getBillingMonths
+GET           /exchange/received-billing-months                                                  controllers.Apix.getReceivedBillingMonths
+POST          /exchange/unpublished                                                              controllers.Apix.getUnpublished
+
+GET           /mint/billing/org-status                                                           controllers.Apix.orgStatus
+GET           /mint/billing/batch-status                                                         controllers.Apix.batchStatus
+POST          /mint/billing/batch                                                                controllers.Apix.submitBatch
+POST          /mint/billing/documents/search                                                     controllers.Apix.searchDocuments
+POST          /mint/billing/draft/preview                                                        controllers.Commerce.draftFrame
+POST          /mint/billing/draft.html                                                           controllers.Apix.draftPreview
+GET           /mint/billing/:id.html                                                             controllers.Apix.getFinalHtml(id: String)
+
+## Adjustments
+GET           /exchange/billingAdjustments                                                       controllers.Apix.getBillingAdjustments
+POST          /exchange/billingAdjustments                                                       controllers.Apix.postBillingAdjustment
+DELETE        /exchange/billingAdjustments/:id                                                   controllers.Apix.deleteBillingAdjustment(id: String)
+PUT           /exchange/billingAdjustments/:id                                                   controllers.Apix.putBillingAdjustment(id: String)
+
+## Packages
+GET           /exchange/package-catalog                                                          controllers.Apix.getPackageCatalog
+GET           /exchange/package-catalog/                                                         controllers.Apix.getPackageCatalog
+#POST    /exchange/package-catalog                                                       controllers.Apix.postPackage
+
+#GET     /exchange/rateplans/:pkgId                                                      controllers.Apix.getRatePlans(pkgId: String)
+#POST    /exchange/rateplans/:pkgId                                                      controllers.Apix.postRatePlan(pkgId: String)
+#PUT     /exchange/rateplans/:pkgId/:id                                                  controllers.Apix.putRatePlan(pkgId: String, id: String)
+#DELETE  /exchange/rateplans/:pkgId/:id                                                  controllers.Apix.deleteRatePlan(pkgId: String, id: String)
+POST          /exchange/organizations/:orgId/monetization-packages/:pkgId/rate-plans             controllers.Apix.postRatePlan(orgId: String, pkgId: String)
+PUT           /exchange/organizations/:orgId/monetization-packages/:pkgId/rate-plans/:id         controllers.Apix.putRatePlan(orgId: String, pkgId: String, id: String)
+DELETE        /exchange/organizations/:orgId/monetization-packages/:pkgId/rate-plans/:id         controllers.Apix.deleteRatePlan(orgId: String, pkgId: String, id: String)
+
+GET           /exchange/products                                                                 controllers.Apix.getProducts(orgId = null)
+GET           /exchange/products/                                                                controllers.Apix.getProducts(orgId = null)
+GET           /exchange/organizations/:orgId/products                                            controllers.Apix.getProducts(orgId: String)
+#PUT     /exchange/organizations/:orgId/products/:id                                     controllers.Apix.putProduct(orgId: String, id: String)
+#GET     /exchange/organizations/:orgId/products/:id                                     controllers.Apix.getProduct(orgId: String, id: String)
+
+## Branding
+GET           /ws/branding                                                                       controllers.ConfigurableAssets.at(file="branding/styles/brandingConfiguration.json")
+GET           /ws/branding/default                                                               controllers.ConfigurableAssets.at(file="branding/styles/brandingConfigurationOrange.json")
+GET           /ws/branding/black                                                                 controllers.ConfigurableAssets.at(file="branding/styles/brandingConfigurationBlack.json")
+GET           /ws/branding/custom                                                                controllers.ConfigurableAssets.at(file="branding/styles/brandingConfigurationCustom.json")
+
+POST          /ws/branding                                                                       controllers.Branding.postBrandingConfiguration
+POST          /ws/branding/custom                                                                controllers.Branding.saveCurrentBrandingAsCustom
+POST          /ws/brandingImage1                                                                 controllers.Branding.postBrandingImageOne
+POST          /ws/brandingImage2                                                                 controllers.Branding.postBrandingImageTwo
+DELETE        /ws/branding                                                                       controllers.Branding.removeBranding
+
+
+# catch all route with slash at the end, pointing to action containing movedPermanently()
+# redirect without the trailing slash
+GET           /*path/                                                                            controllers.Application.redirectUntrailed(path: String)
+

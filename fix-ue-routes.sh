@@ -9,6 +9,5 @@ if [[ ! -d "/opt/apigee/edge-management-ui" ]] ; then
 	exit 1;
 fi
 
-su -m -c "curl -L $MANAGEMEN_UI_FIX_DIST | tar zx  --directory /opt/apigee" apigee
-
+su -m -c "curl -L $MANAGEMEN_UI_FIX_DIST | tar xz  -C  /opt/apigee/edge-management-ui/" apigee
 /opt/apigee/apigee-service/bin/apigee-service edge-management-ui restart

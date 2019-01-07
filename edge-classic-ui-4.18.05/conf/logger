@@ -1,0 +1,22 @@
+## Begin TD-Agent logger Properties ##
+component_logger_logdir=/opt/apigee/var/log/edge-ui
+logdir=/opt/apigee/var/log/apigee-logger
+host=10.128.0.9
+category=${APIGEE_AZ}-opdk-gateway
+es_servers=elasticsearch-int.opdk.apigee.net
+es_index_dateformat=%Y.%m.%d
+es_index_prefix=${conf_system_profile}
+es_flush_interval=10s
+es_request_timeout=15s
+gc_buffer_chunk_limit=2M
+gc_flush_interval=5s
+gc_max_retry_wait=300
+gc_num_threads=8
+
+region=dc-1
+pod=gateway
+az=${APIGEE_AZ}
+release=4.18.05
+dpcolor=green
+es_servers=elasticsearch-int.opdk.apigee.net
+

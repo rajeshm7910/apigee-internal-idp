@@ -1,0 +1,22 @@
+## Begin TD-Agent logger Properties ##
+component_logger_logdir={T}conf_logger_component_logger_logdir{/T}
+logdir={T}conf_logger_logdir{/T}
+host={T}conf_logger_host{/T}
+category={T}conf_logger_category{/T}
+es_servers={T}conf_logger_es_servers{/T}
+es_index_dateformat={T}conf_logger_es_index_dateformat{/T}
+es_index_prefix={T}conf_logger_es_index_prefix{/T}
+es_flush_interval={T}conf_logger_es_flush_interval{/T}
+es_request_timeout={T}conf_logger_es_request_timeout{/T}
+gc_buffer_chunk_limit={T}conf_logger_gc_buffer_chunk_limit{/T}
+gc_flush_interval={T}conf_logger_gc_flush_interval{/T}
+gc_max_retry_wait={T}conf_logger_gc_max_retry_wait{/T}
+gc_num_threads={T}conf_logger_gc_num_threads{/T}
+
+region={T}conf_logger_region{/T}
+pod={T}conf_logger_pod{/T}
+az={T}conf_logger_az{/T}
+release={T}conf_logger_release{/T}
+dpcolor={T}conf_logger_dpcolor{/T}
+es_servers={T}conf_logger_es_servers{/T}
+

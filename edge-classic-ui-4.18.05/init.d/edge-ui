@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# chkconfig: 35 80 20
+# description: This shell script takes care of starting and stopping
+#              the edge-ui service.
+#
+
+### BEGIN INIT INFO
+# Provides: edge-ui 
+# Required-Start: $local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Default-Stop: 0 1 6
+# Short-Description: Start up the edge-ui service 
+# Description:
+### END INIT INFO
+
+APIGEE_ROOT=/opt/apigee
+
+case "$1" in
+  start|stop|status|restart)
+        "$APIGEE_ROOT/apigee-service/bin/apigee-service" edge-ui "$1" 
+        RETVAL=$?
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=2
+        ;;
+esac
+
+exit $RETVAL
+
+
