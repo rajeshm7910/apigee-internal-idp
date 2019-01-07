@@ -11,10 +11,14 @@ Further the local idp can either connect to openldap that comes with Apigee Inst
 
 ### Prerequisites
 
-- apigee-service setup
-apigee-internal idp is a apigee service and you should have apigee-service installed in the machine. You can install apigee-internal-idp on management server.
-- setup repo
+- Setup apigee-service
+
+apigee-internal idp is an apigee service and follows the same installation pattern as any other apigee components. Please look at the Apigee Private Cloud documentation on installing apigee-service. 
+
+- Setup repo
+
 On the machine where you install apigee-internal-idp, create /etc/yum.repos.d/apigee-idp.repo with following contents:
+
 ```
 [apigee-internal-idp]
 name = Apigee  Custom Repo
@@ -25,21 +29,26 @@ gpgcheck = 0
 
 ### Setup
 
-- IDP always runs on TLS.
+- Create Key/Cert pair for setting up IDP.
   
  Generate a TLS cert and key and store them in a keystore fil alsoe. You can use a self-signed certificate CA certs.
  To create a keystore file from your cert and key:
 
 1. Create a directory for the JKS file:
+```
 sudo mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
-
+```
 2. Change to the new directory:
+```
 cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
+```
 
 3. Create a JKS file containing the cert and key. You must specify a keystore for this mode that contains a cert signed by a CA.For an example of creating a JKS file, see Configuring TLS/SSL for Edge On Premises.
 
 4. Make the JKS file owned by the "apigee" user:
+```
 sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
+```
 5. In case you want to quickly want to create a self signed jks
 ```
 mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
@@ -50,11 +59,12 @@ sudo openssl rsa -in key.pem -passin pass:Secret123  -out key.pem
 sudo openssl req -x509 -sha256 -new -key key.pem -out cert.csr  -subj "/C=US/ST=Foo/L=Bar/O=Foobar/OU=Sales/CN=Foobar.com/emailAddress=foo@bar.com" -passin pass:Secret123
 sudo openssl x509 -sha256 -days 365 -in cert.csr -signkey key.pem -out cert.pem -passin pass:Secret123
 
-openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -passout pass:Secret123
+sudo openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -passout pass:Secret123
 
-keytool -importkeystore -srckeystore cert.p12 -srcstoretype PKCS12 -destkeystore cert.jks -deststoretype JKS -deststorepass Secret123 -srcstorepass Secret123
+sudo keytool -importkeystore -srckeystore cert.p12 -srcstoretype PKCS12 -destkeystore cert.jks -deststoretype JKS -deststorepass Secret123 -srcstorepass Secret123
 
-keytool -changealias -alias "1" -destalias "idp" -keystore cert.jks -storepass Secret123
+sudo keytool -changealias -alias "1" -destalias "idp" -keystore cert.jks -storepass Secret123
+sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 
 ```
 - Create a silent config file as shown in example below
