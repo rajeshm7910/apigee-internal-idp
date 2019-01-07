@@ -71,8 +71,9 @@ sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp
 ```
 #Public hostname of IDP hostname
 APIGEE_PASSWORD=Secret123
+MANAGEMENT_UI_PUBLIC_IP=public_hostname_or_ip_of_Edge_Management_UI
 IDP_HOSTNAME=public_hostname_or_ip_of_IDP
-EDGE_UE_URL=http://${IDP_HOSTNAME}:3001
+EDGE_UE_URL=http://${MANAGEMENT_UI_PUBLIC_IP}:3001
 
 #Points to LDAP Host that gets installed with Apigee. In case of external ldap it should point to external ldap. In case its aio setup its localhost
 LDAP_HOSTNAME=localhost #hostname_or_ip_of_ldap
