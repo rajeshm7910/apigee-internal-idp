@@ -73,7 +73,7 @@ sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp
 APIGEE_PASSWORD=Secret123
 MANAGEMENT_UI_PUBLIC_IP=public_hostname_or_ip_of_Edge_Management_UI
 IDP_HOSTNAME=public_hostname_or_ip_of_IDP
-#This parameter specifies on which location the password reset mails goes.Set this to http://{EDGE_UI}:9000 in case you wanto to use classic UI
+#This parameter specifies where password reset mails will be sent.Set this to http://{EDGE_UI}:9000 in case you wanto to use classic UI
 EDGE_UE_URL=http://${MANAGEMENT_UI_PUBLIC_IP}:3001
 
 
