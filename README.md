@@ -118,7 +118,7 @@ curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/di
 ```
 
 ### How to Test
-- In case you are using classic UI, go to http://<edge-ui>:9000. For UE, go to http://<ue-host>:3001
+- In case you are using classic UI, go to http://edge-ui-host:9000. For UE, go to http://edge-management-ui-host:3001
 - You will be prompted with Sign in With your Account Page.
 - On Clicking Sign In, you will be presented with Login Page.
 - Sign in with your opdk credentials. You should be in
