@@ -134,17 +134,23 @@ curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/di
 Classic UI and UE can't be run on same box because they use  common component edge-ui with different configurations. Edge UE(edge-management-ui) depends on edge-ui(Shoehorn or Classic edge ui). It can only be possible to run them in same box if we can clone edge-ui and run the cloned version on a different port.
 
 - Install
+
 Assuming you have Classic UI(edge-ui) component already installed, you can run following script to clone edge-ui as edge-classic-ui.
 ```
 curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/dist/1.0.0/clone-edge-ui.sh | sh -
 ```
-This script creates a apigee-service named edge-classic-ui. This will also set the port as 9098. In case you want to set at other port run this command
+This script creates a apigee-service named edge-classic-ui. This will also set the port as 9098. 
+
 - Change Port
+
+In case you want to set at other port run this command
+
 ```
 curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/dist/1.0.0/clone-edge-ui.sh | sh -s <your-port>
 ```
 
 - Setup 
+
 You can now setup edge-classic-ui and configure sso. Follow instructions in https://docs.apigee.com/private-cloud/v4.18.05/installing-beta-release-edge-new-unified-experience to setup shoehorn UI.
 ```
 Configure the Edge UI:
@@ -155,6 +161,7 @@ Enable SAML on the Edge UI:
 ```
 
 - Uninstall edge-classic-ui
+
 ```
 rm -fr /opt/apigee/edge-classic-ui*
 ```
