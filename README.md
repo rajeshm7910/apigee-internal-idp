@@ -8,7 +8,7 @@ Apigee UE(Unified Experience) comes with only SAML only support which means you 
 Further the local idp can either connect to openldap that comes with Apigee Installation or to your configure with your own ldap directorty service. 
 
 # Architecture 
-![Architecture](./docs/images/OPDK_Auth.png)
+![Architecture](./docs/images/OPDK_Auth.svg)
 
 ## Getting Started
 
