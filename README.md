@@ -34,7 +34,8 @@ gpgcheck = 0
 
 - Create Key/Cert pair for setting up IDP.
   
- Generate a TLS cert and key and store them in a keystore fil alsoe. You can use a self-signed certificate CA certs.
+ Generate a TLS cert and key and store them in a keystore file. You can use a self-signed certificate or CA certs.
+ 
  To create a keystore file from your cert and key:
 
 1. Create a directory for the JKS file:
@@ -52,7 +53,9 @@ cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
 ```
 sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 ```
-5. In case you want to quickly create a self signed Cert in JKS
+
+- Quick Key/Cert Setup Steps
+
 ```
 mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
@@ -70,7 +73,9 @@ sudo keytool -changealias -alias "1" -destalias "idp" -keystore cert.jks -storep
 sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 
 ```
+
 - Create a silent config file as shown in example below
+
 ```
 #Public hostname of IDP hostname
 APIGEE_PASSWORD=Secret123
@@ -101,6 +106,7 @@ IDP_SEALER_KEYPASSWORD=Secret123
 IDP_SEALER_STOREPASSWORD=Secret123
 
 ```
+
 - Install apigee-internal-idp
 ```
 /opt/apigee/apigee-service/bin/apigee-service  apigee-internal-idp install
