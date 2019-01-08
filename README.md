@@ -99,7 +99,7 @@ IDP_TOMCAT_KEYSTORE_ALIAS=idp
 # The password specified when you created the keystore.
 IDP_TOMCAT_KEYSTORE_PASSWORD=Secret123
 
-#This are shibboleth Settings
+#Thes are shibboleth Settings required for backchannel communications.
 IDP_SEALER_PASSWORD=Secret123
 IDP_KEYSTORE_PASSWORD=Secret123
 IDP_SEALER_KEYPASSWORD=Secret123
