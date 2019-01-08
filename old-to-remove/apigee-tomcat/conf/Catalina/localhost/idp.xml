@@ -1,9 +1,0 @@
-<Context docBase="/opt/apigee/shibboleth-idp/war/idp.war"
-         privileged="true"
-         antiResourceLocking="false"
-         swallowOutput="true">
- 
-    <!-- Work around lack of Max-Age support in IE/Edge for Tomcat 8.0.x -->
-    <CookieProcessor alwaysAddExpires="true" />
- 
-</Context>
