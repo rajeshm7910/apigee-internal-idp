@@ -74,7 +74,7 @@ sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp
 
 ```
 
-- Create a silent config file as shown in example below
+- Create  silent config file as shown in example below
 
 ```
 #Public hostname of IDP hostname
@@ -178,5 +178,3 @@ rm -fr /opt/apigee/edge-classic-ui*
 yum autoremove apigee-internal-idp
 rm -fr /opt/apigee/apigee-internal-idp*
 ```
-
-
