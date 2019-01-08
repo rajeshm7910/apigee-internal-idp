@@ -1,0 +1,189 @@
+#!/bin/bash
+#
+# Script summary:
+# ---------------
+# Configures edge-ui to use apigee-sso.
+# Requires apigee-sso to be setup prior to script execution. Script is idempotent unless the following required variable values are changed in the silent.conf file.
+#
+# Required variables:
+# -------------------
+# EDGEUI_SSO_ENABLED=<y/n>
+# SSO_PUBLIC_URL_HOSTNAME=<PUBLIC_ENDPOINT_OF_SSO_SERVER>
+# SSO_PUBLIC_URL_PORT=<PUBLIC_PORT_OF_SSO_SERVER>
+# SSO_PUBLIC_URL_SCHEME=<HTTP/HTTPS>
+# SSO_ADMIN_NAME=<ssoadmin_name> (Required to register edgeui client)
+# SSO_ADMIN_SECRET=<ssoadmin_secret> (Required to register edgeui client)
+# EDGEUI_SSO_CLIENT_NAME=<CLIENT_NAME_REGISTERED_WITH_SSO_FOR_EDGEUI> (optional, default value "edgeui")
+# EDGEUI_SSO_CLIENT_SECRET=<custom_secret>
+# EDGEUI_SSO_REGISTERD_PUBLIC_URIS=<COMMA_SEPARATED_LIST_OF_PUBLICLY_ACCESSIBLE_REDIRECT_URIS> (format is <http_scheme>://<host>:<port>)
+
+source "${APIGEE_ROOT}/apigee-lib/apigee-lib.sh" || exit 1
+source "${APIGEE_ROOT}/apigee-lib/dofflag.sh" || exit 1
+
+TOKEN_DIR="${APIGEE_ROOT}/token/application"
+TOKEN_FILE="${TOKEN_DIR}/${APPLICATION}.properties"
+
+# if EDGEUI_SSO_ENABLED=n then disable apigee-sso integration and fallback to edge-ui's internal implementation for login.
+if [[ -n "${EDGEUI_SSO_ENABLED}" && "${EDGEUI_SSO_ENABLED}" == "n" ]]; then
+    echo "Disabling Single-Sign-On (SSO) service for UI"
+
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.usesso" "\"false\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.usesso2version" "\"false\""  || exit 1
+
+fi
+
+validate_vars "${COMPONENT_NAME}" "configure-sso" "${FFLAG_LIST[1]}" || exit 1
+
+
+_base64encode () {
+  printf "$1" | base64
+}
+
+get_new_access_token() {
+    local CLIENT_NAME=$1
+    local CLIENT_SECRET=$2
+    ACCESS_TOKEN_CONTENT=$(curl -k -s -i -d "grant_type=client_credentials" ${SSO_ENDPOINT}/oauth/token -H "Content-Type: application/x-www-form-urlencoded;charset=utf-8" -H "accept: application/json;charset=utf-8" -H "Authorization: Basic $(_base64encode ${CLIENT_NAME}:${CLIENT_SECRET})" --silent)
+
+    if [[ ${ACCESS_TOKEN_CONTENT} == *"HTTP/1.1 200 OK"* ]]
+    then
+        if [[ ${ACCESS_TOKEN_CONTENT} == *"access_token"* ]]
+        then
+            NEW_ACCESS_TOKEN=$(echo ${ACCESS_TOKEN_CONTENT} | sed -E 's/.*access_token\"\:\"([^\"]+)\".*/\1/')
+            echo "Successfully fetched access token for \"${CLIENT_NAME}\" client"
+        fi
+    else
+        echo "Authentication failed for client ${CLIENT_NAME}.";
+        exit 1
+    fi
+}
+
+recreate_client() {
+    CLIENT_NAME=$1
+    CLIENT_DATA=$2
+
+    #DELETING CLIENT
+    RESPONSE=$(curl -k -s -i -d "${CLIENT_DATA}" -X DELETE ${SSO_ENDPOINT}/oauth/clients/${CLIENT_NAME} -H "Content-Type: application/json" -H "accept: application/json;charset=utf-8" -H "Authorization: Bearer ${NEW_ACCESS_TOKEN}" --silent)
+    if [[ ${RESPONSE} == *"HTTP/1.1 200 OK"* ]]; then
+        echo -e "Successfully deleted old oauth client:\"${CLIENT_NAME}\""
+        create_client ${CLIENT_NAME} ${CLIENT_DATA}
+    else
+        echo -e "Failure in updating oauth client - \"${CLIENT_NAME}\". Response from server was:\n${RESPONSE}\n"
+        exit 1
+    fi
+}
+
+create_client() {
+    CLIENT_NAME=$1
+    CLIENT_DATA=$2
+
+    RESPONSE=$(curl -k -s -i -d "${CLIENT_DATA}" ${SSO_ENDPOINT}/oauth/clients -H "Content-Type: application/json" -H "accept: application/json;charset=utf-8" -H "Authorization: Bearer ${NEW_ACCESS_TOKEN}" --silent)
+    if [[ ${RESPONSE} == *"HTTP/1.1 201 Created"* ]]; then
+        echo -e "Successfully created oauth client:\"${CLIENT_NAME}\""
+    elif [[ ${RESPONSE} == *"HTTP/1.1 409 Conflict"* ]]; then
+        if [[ -n ${EDGEUI_SSO_CLIENT_OVERWRITE} && ${EDGEUI_SSO_CLIENT_OVERWRITE} == "y" ]]; then
+            echo -e "client \"${CLIENT_NAME}\" exists."
+            recreate_client ${CLIENT_NAME} ${CLIENT_DATA}
+        else
+            echo -e "Failure in creating oauth client \"${CLIENT_NAME}\" since it already exists. If you want to overwrite/update client details please set EDGEUI_SSO_CLIENT_OVERWRITE=y"
+            exit 1
+        fi
+    else
+        echo -e "Failure in creating oauth client - \"${CLIENT_NAME}\". Response from server was:\n${RESPONSE}\n"
+        exit 1
+    fi
+}
+
+# if EDGEUI_SSO_ENABLED=y then configure edge-ui to use apigee-sso. following actions are executed:
+# - override necessary token.default properties
+# - register an oauth client named "edgeui" with apigee-sso service.
+
+if [[ -n "${EDGEUI_SSO_ENABLED}" && "${EDGEUI_SSO_ENABLED}" == "y" ]]; then
+
+    validate_vars "${COMPONENT_NAME}" "sso-enable" "${FFLAG_LIST[1]}" || exit 1
+
+    echo "Enabling Single-Sign-On (SSO) service for UI"
+
+    SSO_PUBLIC_URL_HOSTNAME="${SSO_PUBLIC_URL_HOSTNAME:-$(get_input "Enter public hostname or IP for SSO service")}"
+    SSO_PUBLIC_URL_PORT="${SSO_PUBLIC_URL_PORT:-$(get_input "Enter the port on which SSO service is running")}"
+    SSO_PUBLIC_URL_SCHEME="${SSO_PUBLIC_URL_SCHEME:-$(get_input "Enter the http scheme on which SSO service is running")}"
+    SSO_ADMIN_NAME="${SSO_ADMIN_NAME:-$(get_input "Enter admin client name for the SSO service.")}"
+    SSO_ADMIN_SECRET="${SSO_ADMIN_SECRET:-$(get_input "Enter admin password for the SSO service." hidden="y" verify="y")}"
+    EDGEUI_SSO_CLIENT_SECRET="${EDGEUI_SSO_CLIENT_SECRET:-$(get_input "Enter secret for \"edgeui\" client" hidden="y" verify="y")}"
+    EDGEUI_SSO_REGISTERD_PUBLIC_URIS="${EDGEUI_SSO_REGISTERD_PUBLIC_URIS:-$(get_input "Enter comma separated publicly accessible URIs for \"edgeui\". URI format is <scheme>://<host>:<port>" hidden="n" verify="y")}"
+
+    if [[ -n ${EDGEUI_SSO_CLIENT_OVERWRITE} ]]; then
+       valid_yn "${EDGEUI_SSO_CLIENT_OVERWRITE}"
+    fi
+
+    echo
+
+    if [[ ${SSO_PUBLIC_URL_SCHEME} == "https" &&  ${SSO_PUBLIC_URL_PORT} == "443" ]]; then
+        SSO_ENDPOINT="${SSO_PUBLIC_URL_SCHEME}://${SSO_PUBLIC_URL_HOSTNAME}"
+        DEFAULT_ZONE_SSO="${SSO_PUBLIC_URL_HOSTNAME}"
+    else
+        SSO_ENDPOINT=${SSO_PUBLIC_URL_SCHEME}://${SSO_PUBLIC_URL_HOSTNAME}:${SSO_PUBLIC_URL_PORT}
+        DEFAULT_ZONE_SSO="${SSO_PUBLIC_URL_HOSTNAME}:${SSO_PUBLIC_URL_PORT}"
+    fi
+
+    get_new_access_token "${SSO_ADMIN_NAME}" "${SSO_ADMIN_SECRET}"
+
+    #Create edge ui client.
+    EDGEUI_NAME="${EDGEUI_SSO_CLIENT_NAME:-edgeui}"
+
+    EDGEUI_URIS=""
+    EDGEUI_SCHEME="http"
+    URI_COUNT=0
+
+    IFS=',' read -ra URIS <<< "${EDGEUI_SSO_REGISTERD_PUBLIC_URIS}"
+    for i in "${URIS[@]}"; do
+        i=$(echo "${i%/}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+        if [[ $i == https* ]]; then
+            EDGEUI_SCHEME=https
+        fi
+        if [[ ${URI_COUNT} -eq 0 ]];then
+            EDGEUI_URIS+="\"$i/oAuthCallbackWithAuthCode\",\"$i/login\""
+        else
+            EDGEUI_URIS+=",\"$i/oAuthCallbackWithAuthCode\",\"$i/login\""
+        fi
+        URI_COUNT+=1
+    done
+
+    EDGEUI_SECRET="${EDGEUI_SSO_CLIENT_SECRET}"
+    EDGEUI_GRANT_TYPES="\"password\",\"refresh_token\",\"client_credentials\",\"authorization_code\""
+    EDGEUI_SCOPE="\"apigee.support\",\"password.write\",\"scim.me\",\"oauth.approvals\",\"approvals.me\",\"openid\""
+    EDGEUI_ACCESSTOKEN_VALIDITY_SEC=1800
+    EDGEUI_REFRESHTOKEN_VALIDITY_SEC=86400
+    EDGEUI_AUTOAPPROVE="\"apigee.support\",\"password.write\",\"scim.me\",\"oauth.approvals\",\"approvals.me\",\"openid\""
+    EDGEUI_AUTHORITIES="\"virtualhosts.get\",\"userroles.get\",\"users.get\",\"userroles.post\",\"userroles.put\",\"environments.get\",\"notification.get\",\"organizations.delete\",\"notification.put\",\"apigee.support\",\"organizations.get\",\"mint.get\",\"mint.post\",\"organizations.put\",\"organizations.post\",\"notification.post\",\"mint.put\",\"users.put\""
+    EDGEUI_REDIRECT_URIS="${EDGEUI_URIS}"
+    EDGEUI_DATA="{\"client_id\":\"${EDGEUI_NAME}\",\"name\":\"${EDGEUI_NAME}\",\"client_secret\":\"${EDGEUI_SECRET}\",\"authorized_grant_types\":[${EDGEUI_GRANT_TYPES}],\"scope\":[${EDGEUI_SCOPE}],\"access_token_validity\":${EDGEUI_ACCESSTOKEN_VALIDITY_SEC},\"refresh_token_validity\":${EDGEUI_REFRESHTOKEN_VALIDITY_SEC},\"autoapprove\":[${EDGEUI_AUTOAPPROVE}],\"authorities\":[${EDGEUI_AUTHORITIES}],\"redirect_uri\":[${EDGEUI_REDIRECT_URIS}]}"
+
+    create_client ${EDGEUI_NAME} ${EDGEUI_DATA}
+
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.usesso" "\"true\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.usesso2version" "\"true\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssoclientid" "\"${EDGEUI_NAME}\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssoclientsecret" "\"${EDGEUI_SSO_CLIENT_SECRET}\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.sso2endpointhost" "\"${DEFAULT_ZONE_SSO}\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssosignouturl" "\"${SSO_ENDPOINT}/logout.do\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssousersettingsurl" "\"${SSO_ENDPOINT}/profile\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssouserinfourl" "\"${SSO_ENDPOINT}/userinfo\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssosigninurl" "\"${SSO_ENDPOINT}/oauth/authorize\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.sso2tokenendpoint" "\"${SSO_ENDPOINT}/oauth/token\""  || exit 1
+    replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.disablessoemailvalidation" "\"true\""  || exit 1
+
+    if [ "${EDGEUI_ENABLE_UNIFIED_UI}" == "y" ]; then
+      replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssoclientid" "\"${MANAGEMENT_UI_SSO_CLIENT_ID}\""  || exit 1
+      replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.feature.ssoclientsecret" "\"${MANAGEMENT_UI_SSO_CLIENT_SECRET}\""  || exit 1
+    fi
+
+    #If any of the redirect URIs is https the isinternalinstallation will be set to false, else set to true
+    if [ ${EDGEUI_SCHEME} == "https" ]; then
+        replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.isinternalinstallation" "\"false\""  || exit 1
+    else
+        replace_var "${TOKEN_FILE}" "conf_apigee-base_apigee.isinternalinstallation" "\"true\""  || exit 1
+    fi
+
+fi
+
+${APIGEE_SERVICE} ${COMPONENT_NAME} restart

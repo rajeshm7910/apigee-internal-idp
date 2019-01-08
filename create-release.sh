@@ -24,16 +24,19 @@ su -m -c "fpm -s dir -t rpm -a noarch -n apigee-tomcat-idp --version 8.5.37 --it
 su -m -c "ln -s apigee-internal-idp-1.0.0 apigee-internal-idp" apigee
 su -m -c "fpm -s dir -t rpm -a noarch -n apigee-internal-idp --version 1.0.0 --iteration ${ITERATION} -d apigee-tomcat-idp -d apigee-shibboleth-identity-provider --rpm-use-file-permissions --prefix /opt/apigee/ --directories ./apigee-internal-idp-1.0.0 apigee-internal-idp-1.0.0 apigee-internal-idp" apigee
 
-su -m -c "ln -s edge-classic-ui-4.18.05 edge-classic-ui" apigee
-su -m -c "fpm -s dir -t rpm -a noarch -n edge-classic-ui --version 1.0.0 --iteration ${ITERATION} -d edge-classic-ui  --rpm-use-file-permissions --prefix /opt/apigee/ --directories ./edge-classic-ui-4.18.05 edge-classic-ui-4.18.05 edge-classic-ui" apigee
+#su -m -c "ln -s edge-classic-ui-4.18.05 edge-classic-ui" apigee
+#su -m -c "fpm -s dir -t rpm -a noarch -n edge-classic-ui --version 4.18.05 --iteration ${ITERATION} -d edge-classic-ui  --rpm-use-file-permissions --prefix /opt/apigee/ --directories ./edge-classic-ui-4.18.05 edge-classic-ui-4.18.05 edge-classic-ui" apigee
+
 
 rm -fr dist/1.0.0/*
 mv *.rpm dist/1.0.0/
 #targz the edge-management-ui
 su -m -c "tar czf dist/1.0.0/edge-management-ui.tar.gz -C edge-management-ui/ ." apigee
 su -m -c "cp -fr fix-ue-routes.sh dist/1.0.0/" apigee
+su -m -c "tar czf dist/1.0.0/edge-classic-ui-clone.tar.gz -C edge-classic-ui-clone/ ." apigee
+su -m -c "cp -fr clone-edge-ui.sh dist/1.0.0/" apigee
 su -m -c "createrepo dist/1.0.0/" apigee
 unlink apigee-shibboleth-identity-provider
 unlink apigee-tomcat-idp
 unlink apigee-internal-idp
-unlink edge-classic-ui
+#unlink edge-classic-ui
