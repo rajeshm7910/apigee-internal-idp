@@ -117,7 +117,7 @@ UE doesn't support Forgot Password feature. To enable this feature, run this com
 curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/dist/1.0.0/fix-ue-routes.sh | sh -
 ```
 
-### How to Test
+### How to Test?
 - In case you are using classic UI, go to http://edge-ui-host:9000. For UE, go to http://edge-management-ui-host:3001
 - You will be prompted with Sign in With your Account Page.
 - On Clicking Sign In, you will be presented with Login Page.
@@ -126,7 +126,7 @@ curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/di
 - The user should be  get an email and he should be able to click on Password reset to set his account password.
 - Use Management API calls with the same credentials. You can use both basic and token based authentication for your users.
 
-### How to install classic ui and UE on same machine
+### How to install Classic ui and UE on same machine?
 
 Classic UI and UE can't be run on same box because they use  common component edge-ui with different configurations. Edge UE(edge-management-ui) depends on edge-ui(Shoehorn or Classic edge ui). It can only be possible to run them in same box if we can clone edge-ui and run the cloned version on a different port.
 
@@ -156,10 +156,7 @@ Enable SAML on the Edge UI:
 rm -fr /opt/apigee/edge-classic-ui*
 ```
 
-
-
-
-### How to uninstall
+### Uninstall apigee-internal-idp
 
 ```
 yum autoremove apigee-internal-idp
