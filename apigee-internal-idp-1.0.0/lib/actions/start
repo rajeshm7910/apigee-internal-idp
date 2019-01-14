@@ -1,0 +1,39 @@
+#!/bin/bash
+# SYNOPSIS: setup [-f CONFIG]
+#
+# FLAGS: -f CONFIG (optional) apply settings from given CONFIG file
+#
+# ARGUMENTS: none
+#
+
+echo "Setting up apigee-internal-idp"
+if [ "$microkernel_installType" == "asg" ]; then
+echo "Skipping apigee-internal-idp setup for ASG deployment as it's handled thru CWC"
+exit 0
+fi
+
+source "${APIGEE_ROOT}/apigee-lib/apigee-lib.sh" || exit 1
+source "${APIGEE_ROOT}/etc/defaults.sh" || exit 1
+source "${APIGEE_ROOT}/apigee-lib/dofflag.sh" || exit 1
+validate_vars "${APIGEE_PREFIX}${APPLICATION}" "setup" || exit 1
+APIGEE_SERVICE="${APIGEE_ROOT}/apigee-service/bin/apigee-service"
+
+#####################################
+# Step 1 : Configure Shibboleth idp #
+#####################################
+
+
+rebuild_shibboleth() {
+
+
+CHECKED_CALL "${APIGEE_SERVICE}" "${COMPONENT_NAME}" configure
+
+echo "Rebuilding war file after configuration changes"
+${APIGEE_ROOT}/${COMPONENT_NAME}/shibboleth-idp/bin/build.sh -Didp.target.dir=${APIGEE_ROOT}/apigee-internal-idp/shibboleth-idp -Didp.noprompt=true
+
+#CHECKED_CALL "${APIGEE_SERVICE}" "${COMPONENT_NAME}" start
+call_action start "@"
+
+}
+
+rebuild_shibboleth

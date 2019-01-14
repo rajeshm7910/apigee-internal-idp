@@ -9,7 +9,7 @@ bump_version() {
   v_patch=${base_list[2]}
   v_patch=$((v_patch + 1))
   suggested_version="$v_major.$v_minor.$v_patch"
-  echo $suggested_version > version.txt 
+  su -m -c "echo $suggested_version > version.txt" apigee 
   ITERATION=$suggested_version
 }
 
