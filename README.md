@@ -172,6 +172,28 @@ Enable SAML on the Edge UI:
 rm -fr /opt/apigee/edge-classic-ui*
 ```
 
+### External Authentication
+
+- Open /opt/apigee/customer/application/internal-idp.properties in a text editor. If the file does not exist, create it.
+
+- Add following lines:
+```
+conf_idp_ldap.authentication.bind.type=bindSearchAuthenticator
+conf_idp_ldap.authentication.server.host=127.0.0.1
+conf_idp_ldap.authentication.server.port=10389
+conf_idp_ldap.authentication.user.store.baseDN="dc=apigee,dc=com"
+conf_idp_ldap.authentication.user.store.user.attribute="mail"
+conf_idp_ldap.authentication.user.store.search.query="(mail=\$resolutionContext.principal)"
+conf_idp_ldap.authentication.user.store.return.attributes="mail sn cn"
+conf_idp_ldap.authentication.indirect.bind.server.admin.dn="uid=admin,ou=users,ou=global,dc=apigee,dc=com"
+conf_idp_ldap.authentication.indirect.bind.server.admin.password=""
+```
+- Restart apigee-internal-idp
+```
+/opt/apigee/apigee-service/bin/apigee-service apigee-internal-idp restart
+
+```
+
 ### Uninstall apigee-internal-idp
 
 ```
