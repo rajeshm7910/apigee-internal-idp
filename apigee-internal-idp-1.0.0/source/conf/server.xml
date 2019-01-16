@@ -62,7 +62,7 @@
                    keystorePass="{T}conf_server_idp_tomcat_keystore_password{/T}"
                    keyAlias="{T}conf_server_idp_tomcat_keyalias{/T}"
                    clientAuth="{T}conf_server_idp_tomcat_clientauth_enabled{/T}"
-                   sslEnabledProtocols="{T}conf_idp_server_tomcat_ssl_protocols{/T}"
+                   sslEnabledProtocols="{T}conf_server_idp_tomcat_ssl_protocols{/T}"
             {COND #conf_server_idp_tomcat_proxyPort!=null and #conf_server_idp_tomcat_proxyPort!=""}
                    proxyPort="{T}conf_server_idp_tomcat_proxyPort{/T}"
             {/COND}
