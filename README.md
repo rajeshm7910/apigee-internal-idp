@@ -32,11 +32,11 @@ gpgcheck = 0
 
 ### Setup
 
-- Create Key/Cert pair for setting up IDP.
-  
- Generate a TLS cert and key and store them in a keystore file. You can use a self-signed certificate or CA certs.
- 
- To create a keystore file from your cert and key:
+- Create Key/Cert pair for setting up Tomcat.
+
+Generate a TLS cert and key and store them in a keystore file. You can use a self-signed certificate or CA certificate.
+
+To create a keystore file from your cert and key:
 
 1. Create a directory for the JKS file:
 ```
@@ -47,7 +47,7 @@ sudo mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
 cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
 ```
 
-3. Create a JKS file containing the cert and key. You must specify a keystore for this mode that contains a cert signed by a CA.For an example of creating a JKS file, see Configuring TLS/SSL for Edge On Premises.
+3. Create a JKS file containing the cert and key. You must specify a keystore for this mode that contains a cert signed by a CA. For an example of creating a JKS file, see Configuring TLS/SSL for Edge On Premises.
 
 4. Make the JKS file owned by the "apigee" user:
 ```
@@ -62,18 +62,12 @@ cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 
 openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem -x509 -sha256  -subj "/C=US/ST=Foo/L=Bar/O=Foobar/OU=Sales/CN=Foobar.com/emailAddress=foo@bar.com"
 
-sudo openssl genrsa -aes256 -passout pass:Secret123 -out key.pem 2048
-sudo openssl rsa -in key.pem -passin pass:Secret123  -out key.pem
+openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -passout pass:Secret123
 
-sudo openssl req -x509 -sha256 -new -key key.pem -out cert.csr  -subj "/C=US/ST=Foo/L=Bar/O=Foobar/OU=Sales/CN=Foobar.com/emailAddress=foo@bar.com" -passin pass:Secret123
-sudo openssl x509 -sha256 -days 365 -in cert.csr -signkey key.pem -out cert.pem -passin pass:Secret123
+keytool -importkeystore -srckeystore cert.p12 -srcstoretype PKCS12 -destkeystore cert.jks -deststoretype JKS -deststorepass Secret123 -srcstorepass Secret123
 
-sudo openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12 -passout pass:Secret123
-
-sudo keytool -importkeystore -srckeystore cert.p12 -srcstoretype PKCS12 -destkeystore cert.jks -deststoretype JKS -deststorepass Secret123 -srcstorepass Secret123
-
-sudo keytool -changealias -alias "1" -destalias "idp" -keystore cert.jks -storepass Secret123
-sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
+keytool -changealias -alias "1" -destalias "idp" -keystore cert.jks -storepass Secret123
+chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 
 ```
 
@@ -92,12 +86,12 @@ LDAP_HOSTNAME=localhost #hostname_or_ip_of_ldap
 LDAP_PORT=10389 #ldap port
 
 #IDP Settings
-#IDP needs to be setup on https. It can be setup as standalone tomcat or behind loadbalancer.Even when tomcat is behind loadbalancer, tomcat needs to be set up with ssl.
+#IDP needs to be setup on https. It can be setup as standalone tomcat or behind loadbalancer. Even when tomcat is behind loadbalancer, tomcat needs to be set up with ssl.
 
 IDP_PUBLIC_URL_HOSTNAME=public_hostname_or_ip_of_IDP
 IDP_PUBLIC_URL_SCHEME=https
 
-#SSL_TERMINATION configuration means SSL setup in Standalone Tomcat.
+#SSL_TERMINATION configuration means SSL is setup in Standalone Tomcat.
 
 IDP_TOMCAT_PROFILE=SSL_TERMINATION
 IDP_PUBLIC_URL_PORT=9090
