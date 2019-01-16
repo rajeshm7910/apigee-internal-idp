@@ -185,6 +185,9 @@ rm -fr /opt/apigee/edge-classic-ui*
 
 ### External Authentication
 
+You can set IDP to setup external authentication. This can be done with code with config. 
+You also have to configure management server with external authentication as documented in Apigee documentation.
+
 - Open /opt/apigee/customer/application/internal-idp.properties in a text editor. If the file does not exist, create it.
 
 - Add following lines:
@@ -192,12 +195,12 @@ rm -fr /opt/apigee/edge-classic-ui*
 conf_idp_ldap.authentication.bind.type=bindSearchAuthenticator
 conf_idp_ldap.authentication.server.host=127.0.0.1
 conf_idp_ldap.authentication.server.port=10389
-conf_idp_ldap.authentication.user.store.baseDN="dc=apigee,dc=com"
-conf_idp_ldap.authentication.user.store.user.attribute="mail"
-conf_idp_ldap.authentication.user.store.search.query="(mail=\$resolutionContext.principal)"
-conf_idp_ldap.authentication.user.store.return.attributes="mail sn cn"
-conf_idp_ldap.authentication.indirect.bind.server.admin.dn="uid=admin,ou=users,ou=global,dc=apigee,dc=com"
-conf_idp_ldap.authentication.indirect.bind.server.admin.password=""
+conf_idp_ldap.authentication.user.store.baseDN=dc=apigee,dc=com
+conf_idp_ldap.authentication.user.store.user.attribute=mail
+conf_idp_ldap.authentication.user.store.search.query=(mail=\$resolutionContext.principal)
+conf_idp_ldap.authentication.user.store.return.attributes=mail sn cn
+conf_idp_ldap.authentication.indirect.bind.server.admin.dn=uid=admin,ou=users,ou=global,dc=apigee,dc=com
+conf_idp_ldap.authentication.indirect.bind.server.admin.password=Secret123
 ```
 - Restart apigee-internal-idp
 ```
