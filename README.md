@@ -54,7 +54,7 @@ cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
 sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 ```
 
-- Quick Key/Cert Setup Steps
+- Quick Self Signed Key/Cert Setup Steps
 
 ```
 mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
