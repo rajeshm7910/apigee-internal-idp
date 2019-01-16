@@ -49,12 +49,7 @@ cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/
 
 3. Create a JKS file containing the cert and key. You must specify a keystore for this mode that contains a cert signed by a CA. For an example of creating a JKS file, see Configuring TLS/SSL for Edge On Premises.
 
-4. Make the JKS file owned by the "apigee" user:
-```
-sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
-```
-
-- Quick Self Signed Key/Cert Setup Steps
+In Case you want to Quickly setup a Self Signed Key/Cert follow these steps:
 
 ```
 mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
@@ -70,6 +65,12 @@ keytool -changealias -alias "1" -destalias "idp" -keystore cert.jks -storepass S
 chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 
 ```
+
+4. Make the JKS file owned by the "apigee" user:
+```
+sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
+```
+
 
 - Create  silent config file as shown in example below
 
