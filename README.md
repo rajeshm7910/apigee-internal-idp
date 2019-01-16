@@ -59,6 +59,9 @@ sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp
 ```
 mkdir -p /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
 cd /opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl
+
+openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem -x509 -sha256  -subj "/C=US/ST=Foo/L=Bar/O=Foobar/OU=Sales/CN=Foobar.com/emailAddress=foo@bar.com"
+
 sudo openssl genrsa -aes256 -passout pass:Secret123 -out key.pem 2048
 sudo openssl rsa -in key.pem -passin pass:Secret123  -out key.pem
 
@@ -80,7 +83,6 @@ sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp
 #Public hostname of IDP hostname
 APIGEE_PASSWORD=Secret123
 MANAGEMENT_UI_PUBLIC_IP=public_hostname_or_ip_of_Edge_Management_UI
-IDP_HOSTNAME=public_hostname_or_ip_of_IDP
 #This parameter specifies where password reset mails will be sent.Set this to http://{EDGE_UI}:9000 in case you wanto to use classic UI
 EDGE_UE_URL=http://${MANAGEMENT_UI_PUBLIC_IP}:3001
 
@@ -89,17 +91,32 @@ EDGE_UE_URL=http://${MANAGEMENT_UI_PUBLIC_IP}:3001
 LDAP_HOSTNAME=localhost #hostname_or_ip_of_ldap
 LDAP_PORT=10389 #ldap port
 
-# Specify the port, typically between 1025 and 65535.
+#IDP Settings
+#IDP needs to be setup on https. It can be setup as standalone tomcat or behind loadbalancer.Even when tomcat is behind loadbalancer, tomcat needs to be set up with ssl.
+
+IDP_PUBLIC_URL_HOSTNAME=public_hostname_or_ip_of_IDP
+IDP_PUBLIC_URL_SCHEME=https
+
+#SSL_TERMINATION configuration means SSL setup in Standalone Tomcat.
+
+IDP_TOMCAT_PROFILE=SSL_TERMINATION
+IDP_PUBLIC_URL_PORT=9090
+
+#SSL_PROXY configuration means Load balancer in front of Tomcat.
+
+#IDP_TOMCAT_PROFILE=SSL_PROXY
+#IDP_PUBLIC_URL_PORT=443
+#IDP_PROXY_PORT=443
+
 IDP_TOMCAT_PORT=9090
-IDP_TOMCAT_SCHEME=https
-IDP_TOMCAT_ENABLE_SSL=true
+
 # Specify the path to the keystore file.
 IDP_TOMCAT_KEYSTORE_FILEPATH=/opt/apigee/customer/application/apigee-internal-idp/tomcat-ssl/cert.jks
 IDP_TOMCAT_KEYSTORE_ALIAS=idp
 # The password specified when you created the keystore.
 IDP_TOMCAT_KEYSTORE_PASSWORD=Secret123
 
-#Thes are shibboleth Settings required for backchannel communications.
+#These are shibboleth Settings required for backchannel communications.
 IDP_SEALER_PASSWORD=Secret123
 IDP_KEYSTORE_PASSWORD=Secret123
 IDP_SEALER_KEYPASSWORD=Secret123
