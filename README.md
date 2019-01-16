@@ -32,7 +32,7 @@ gpgcheck = 0
 
 ### Setup
 
-- Create Key/Cert pair for setting up Tomcat.
+- **Create Key/Cert pair for setting up Tomcat.**
 
 Generate a TLS cert and key and store them in a keystore file. You can use a self-signed certificate or CA certificate.
 
@@ -72,7 +72,7 @@ sudo chown -R apigee:apigee /opt/apigee/customer/application/apigee-internal-idp
 ```
 
 
-- Create  silent config file as shown in example below
+- **Create  silent config file as shown in example below**
 
 ```
 #Public hostname of IDP hostname
@@ -119,20 +119,20 @@ IDP_SEALER_STOREPASSWORD=Secret123
 
 ```
 
-- Install apigee-internal-idp
+- **Install apigee-internal-idp**
 ```
 /opt/apigee/apigee-service/bin/apigee-service  apigee-internal-idp install
 /opt/apigee/apigee-service/bin/apigee-service apigee-internal-idp setup -f /tmp/idp-config.txt
 ```
-- Get the IDP Metadata
+- **IDP Metadata**
 ```
 curl -k https://IDP_PUBLIC_URI_HOSTNAME:IDP_PUBLIC_URI_PORT/idp/metadata
 ```
-- Setup apigee-sso with the idp metadata. 
+- **Setup apigee-sso with the idp metadata.** 
 Follow instructions https://docs.apigee.com/private-cloud/v4.18.05/supporting-saml-edge-private-cloud
 
-- Setup edge-ue as documented in apigee documentation
-- Fix edge-management-ue routes to support password Flows
+- **Setup edge-ue as documented in apigee documentation**
+- **Fix edge-management-ue routes to support password Flows**
 UE doesn't support Forgot Password feature. To enable this feature, run this command on the box where edge-management-ui is installed
 ```
 curl https://raw.githubusercontent.com/rajeshm7910/apigee-internal-idp/master/dist/1.0.0/fix-ue-routes.sh | sh -
