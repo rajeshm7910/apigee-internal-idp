@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APIGEE_ROOT=/opt/apigee
-EDGE_UI_CLONE_FIX="https://raw.github.com/rajeshm7910/apigee-internal-idp/tree/master/dist/1.0.0/edge-classic-ui-clone.tar.gz"
+EDGE_UI_CLONE="https://github.com/rajeshm7910/apigee-internal-idp/releases/download/1.0.0/edge-classic-ui-clone.tar.gz"
 #EDGE_UI_CLONE="http://localhost:88/customrepo/edge-classic-ui-clone.tar.gz"
 PORT=${1:-9098}
 

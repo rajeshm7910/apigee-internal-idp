@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 APIGEE_ROOT=/opt/apigee
-MANAGEMEN_UI_FIX_DIST="https://raw.github.com/rajeshm7910/apigee-internal-idp/tree/master/dist/1.0.0/edge-management-ui.tar.gz"
+MANAGEMEN_UI_FIX_DIST="https://github.com/rajeshm7910/apigee-internal-idp/releases/download/1.0.0/edge-management-ui.tar.gz"
 #MANAGEMEN_UI_FIX_DIST="http://localhost:88/customrepo/edge-management-ui.tar.gz"
 
 if [[ ! -d "/opt/apigee/edge-management-ui" ]] ; then
