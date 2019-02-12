@@ -126,7 +126,7 @@ IDP_SEALER_STOREPASSWORD=Secret123
 ```
 - **IDP Metadata**
 ```
-curl -k https://IDP_PUBLIC_URI_HOSTNAME:IDP_PUBLIC_URI_PORT/idp/metadata
+curl -k https://IDP_PUBLIC_URI_HOSTNAME:IDP_PUBLIC_URI_PORT/idp/shibboleth
 ```
 - **Setup apigee-sso with the idp metadata.** 
 Follow instructions https://docs.apigee.com/private-cloud/v4.18.05/supporting-saml-edge-private-cloud
